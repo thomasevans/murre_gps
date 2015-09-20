@@ -11,3 +11,4 @@ vignettes/*.pdf
 .Rproj.user
 murre_gps.Rproj
 .RData
+SWE_adm0.RData
