@@ -304,15 +304,19 @@ str(export.table)
 # Output annotation to new DB table include device_info_serial
 # and date_time for primary key data
 
+# Check for duplicates
+test <- cbind(export.table$device_info_serial, export.table$date_time)
+test2 <- duplicated(test)
 
-
+# no duplicates
+export.table.new <- export.table[!test2,]
 
 
 # Write to database
 
 
 #will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
-sqlSave(gps.db, export.table,
+sqlSave(gps.db, export.table.new,
         tablename = "guillemots_gps_points_igu_class",
         append = FALSE, rownames = FALSE, colnames = FALSE,
         verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
