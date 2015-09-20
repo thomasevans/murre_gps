@@ -11,13 +11,14 @@
 library("RODBC")
 
 # Connect to DB
-gps.db <- odbcConnectAccess2007('D:/Dropbox/tracking_db/GPS_db.accdb')
+gps.db <- odbcConnectAccess2007('D:/Dropbox/tracking_db/murre_db/murre_db.accdb')
 
 # Get GPS data
 points <- sqlQuery(gps.db,
-                   query = "SELECT DISTINCT f.*
-                   FROM guillemots_gps_points_igu AS f
-                   ORDER BY f.device_info_serial ASC, f.date_time;",
+                   query = "SELECT g.device_info_serial, g.date_time, g.latitude, g.longitude, g.speed_ms, g.timeout, g.ehpe, guillemots_track_session.ring_number
+FROM guillemots_track_session, guillemots_gps_points_igu AS g
+                   WHERE (((g.date_time)>=[guillemots_track_session].[start_date] And (g.date_time)<=[guillemots_track_session].[end_date]) AND ((guillemots_track_session.device_info_serial)=g.device_info_serial))
+                   ORDER BY g.device_info_serial, g.date_time;",
                    as.is = TRUE)
 
 
@@ -30,21 +31,13 @@ summary(gps_val)
 # Is good quality GPS fix?
 f0 <- gps_val & (points$timeout <= 100)
 f1 <- gps_val & (points$ehpe <= 100)
-# f2 <- gps_val & (points$timeout <= 150)
 gps_ok <- f0 & f1
 summary(gps_ok)
-# gps_ok2 <- f0 & f2
-# summary(gps_ok2)
 
-# 
-# map.trip(points = points)
-# points(points$lat[!gps_ok]~points$long[!gps_ok],
-#        col = "magenta", pch = 8, cex = 1.2)
-# points(points$lat[!gps_ok2]~points$long[!gps_ok2],
-#        col = "green", pch = 8, cex = 1.2)
-
-
-
+# Look at those flagged as NA - appear to be only the 2009 data
+# which were not downloaded with the igotu2gpx program
+points2 <- points[is.na(gps_ok),]
+unique(points2$device_info_serial)
 
 
 # Label by 'behaviour' ------
@@ -60,6 +53,9 @@ summary(gps_ok)
 flight <- points$speed_ms > 5
 summary(flight)
 
+# # Check above looks sensible
+# hist(points$speed_ms, ylim = c(0,2000), breaks = 100)
+# abline(v=5)
 
 # 2. Collony ----
 
