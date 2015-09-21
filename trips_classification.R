@@ -20,21 +20,47 @@ gps.db <- odbcConnectAccess2007('D:/Dropbox/tracking_db/murre_db/murre_db.accdb'
 
 
 # Get uva data
-deployments <- sqlQuery(gps.db,
-                        query = "SELECT DISTINCT d.*
-                        FROM guillemots_track_session AS d
-                        ORDER BY d.device_info_serial ASC;",
+gpspoints.uva <- sqlQuery(gps.db,
+                        query = "SELECT uvabits_gps.device_info_serial, uvabits_gps.date_time, uvabits_gps.latitude, uvabits_gps.longitude, guillemots_track_session.ring_number, guillemots_gps_points_uva_class.coldist, guillemots_gps_points_uva_class.type
+FROM guillemots_track_session, guillemots_gps_points_uva_class INNER JOIN uvabits_gps ON (guillemots_gps_points_uva_class.date_time = uvabits_gps.date_time) AND (guillemots_gps_points_uva_class.device_info_serial = uvabits_gps.device_info_serial)
+                        WHERE (((uvabits_gps.date_time)>=[guillemots_track_session].[start_date] And (uvabits_gps.date_time)<=[guillemots_track_session].[end_date]) AND ((uvabits_gps.latitude)<>0) AND ((uvabits_gps.longitude)<>0) AND ((guillemots_track_session.device_info_serial)=[uvabits_gps].[device_info_serial]))
+                        ORDER BY uvabits_gps.device_info_serial, uvabits_gps.date_time;
+                        ",
                         as.is = TRUE)
 
 
 # Get igu data
+gpspoints.igu <- sqlQuery(gps.db,
+                          query = "SELECT guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time, guillemots_gps_points_igu.latitude, guillemots_gps_points_igu.longitude, guillemots_track_session.ring_number, guillemots_gps_points_igu_class.coldist, guillemots_gps_points_igu_class.type
+FROM guillemots_track_session, guillemots_gps_points_igu_class INNER JOIN guillemots_gps_points_igu ON (guillemots_gps_points_igu.date_time = guillemots_gps_points_igu_class.date_time) AND (guillemots_gps_points_igu_class.device_info_serial = guillemots_gps_points_igu.device_info_serial)
+                          WHERE (((guillemots_gps_points_igu.date_time)>=[guillemots_track_session].[start_date] And (guillemots_gps_points_igu.date_time)<=[guillemots_track_session].[end_date]) AND ((guillemots_gps_points_igu.latitude)<>0) AND ((guillemots_gps_points_igu.longitude)<>0) AND ((guillemots_track_session.device_info_serial)=[guillemots_gps_points_igu].[device_info_serial]))
+                          ORDER BY guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time;
+                          ",
+                          as.is = TRUE)
 
 
 # Combine
+gpspoints <- rbind(gpspoints.uva, gpspoints.igu)
+
+# Get data into correct types
+str(gpspoints)
+# datetime
+gpspoints$date_time <- as.POSIXct(gpspoints$date_time, tz = "UTC")
 
 
 
 
+# Unique track occasion
+# combine year and ring_number
+years <- format(gpspoints$date_time, "%Y")
+dep_id <- paste(gpspoints$ring_number, years, sep = "_")
+
+
+# Sort data by deployment id then date_time
+ord <- order(dep_id, gpspoints$date_time)
+x <- cbind(gpspoints, dep_id, years)
+# Use this for res of analysis
+points_all <- x[ord,]
 
 
 
