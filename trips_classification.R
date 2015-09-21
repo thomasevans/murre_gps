@@ -150,12 +150,13 @@ trip_id <- rep(0,length(loc_type))
 x <- 0
 n <- length(loc_type)
 ind <- c(1:n)
-new_deployment <- FALSE
+new_deployment <- TRUE
 
 
 for(i in 1:n){
   if(loc_type[i] == 4){new_deployment <- TRUE
   trip_id[i] <- 0
+  x <- x + 1
   }
   if(loc_type[i] != 0 & loc_type[i] != 4){
     #if start of a trip, increment x by one
@@ -172,8 +173,8 @@ for(i in 1:n){
   }
 }
 
-
-
+# test <- points_all[trip_id == 160,]
+# test2 <- cbind(points_all,loc_type,trip_id)
 
 
 
