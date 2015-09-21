@@ -12,3 +12,9 @@ vignettes/*.pdf
 murre_gps.Rproj
 .RData
 SWE_adm0.RData
+
+# image files
+*.png
+*.pdf
+*.jpg
+*.wmf
