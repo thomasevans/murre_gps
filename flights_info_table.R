@@ -11,7 +11,7 @@ gps.db <- odbcConnectAccess2007('D:/Dropbox/tracking_db/murre_db/murre_db.accdb'
 
 # Get uva data
 gpspoints.uva <- sqlQuery(gps.db,
-                          query = "SELECT uvabits_gps.device_info_serial, uvabits_gps.date_time, uvabits_gps.latitude, uvabits_gps.longitude, guillemots_track_session.ring_number, guillemots_gps_points_uva_class.coldist, guillemots_gps_points_uva_class.type, guillemots_gps_points_trip_id.trip_id, guillemots_gps_points_trip_id.deploy_id, guillemots_gps_points_flight_id.flight_id
+                          query = "SELECT uvabits_gps.device_info_serial, uvabits_gps.date_time, uvabits_gps.latitude, uvabits_gps.longitude, uvabits_gps.altitude, uvabits_gps.speed_2d, guillemots_track_session.ring_number, guillemots_gps_points_uva_class.coldist, guillemots_gps_points_uva_class.type, guillemots_gps_points_trip_id.trip_id, guillemots_gps_points_trip_id.deploy_id, guillemots_gps_points_flight_id.flight_id
 FROM guillemots_track_session, guillemots_gps_points_flight_id INNER JOIN (guillemots_gps_points_trip_id INNER JOIN (guillemots_gps_points_uva_class INNER JOIN uvabits_gps ON (guillemots_gps_points_uva_class.device_info_serial = uvabits_gps.device_info_serial) AND (guillemots_gps_points_uva_class.date_time = uvabits_gps.date_time)) ON (guillemots_gps_points_trip_id.date_time = uvabits_gps.date_time) AND (guillemots_gps_points_trip_id.device_info_serial = uvabits_gps.device_info_serial)) ON (guillemots_gps_points_flight_id.date_time = guillemots_gps_points_trip_id.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_trip_id.device_info_serial)
                           WHERE (((uvabits_gps.date_time)>=[guillemots_track_session].[start_date] And (uvabits_gps.date_time)<=[guillemots_track_session].[end_date]) AND ((uvabits_gps.latitude)<>0) AND ((uvabits_gps.longitude)<>0) AND ((guillemots_track_session.device_info_serial)=[uvabits_gps].[device_info_serial]))
                           ORDER BY uvabits_gps.device_info_serial, uvabits_gps.date_time;
@@ -21,12 +21,17 @@ FROM guillemots_track_session, guillemots_gps_points_flight_id INNER JOIN (guill
 
 # Get igu data
 gpspoints.igu <- sqlQuery(gps.db,
-                          query = "SELECT guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time, guillemots_gps_points_igu.latitude, guillemots_gps_points_igu.longitude, guillemots_track_session.ring_number, guillemots_gps_points_igu_class.coldist, guillemots_gps_points_igu_class.type, guillemots_gps_points_trip_id.trip_id, guillemots_gps_points_trip_id.deploy_id, guillemots_gps_points_flight_id.flight_id
+                          query = "SELECT guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time, guillemots_gps_points_igu.latitude, guillemots_gps_points_igu.longitude, guillemots_gps_points_igu.elev, guillemots_gps_points_igu.speed_ms, guillemots_track_session.ring_number, guillemots_gps_points_igu_class.coldist, guillemots_gps_points_igu_class.type, guillemots_gps_points_trip_id.trip_id, guillemots_gps_points_trip_id.deploy_id, guillemots_gps_points_flight_id.flight_id
 FROM guillemots_track_session, guillemots_gps_points_flight_id INNER JOIN (guillemots_gps_points_trip_id INNER JOIN (guillemots_gps_points_igu_class INNER JOIN guillemots_gps_points_igu ON (guillemots_gps_points_igu_class.date_time = guillemots_gps_points_igu.date_time) AND (guillemots_gps_points_igu_class.device_info_serial = guillemots_gps_points_igu.device_info_serial)) ON (guillemots_gps_points_trip_id.date_time = guillemots_gps_points_igu_class.date_time) AND (guillemots_gps_points_trip_id.device_info_serial = guillemots_gps_points_igu_class.device_info_serial)) ON (guillemots_gps_points_igu.date_time = guillemots_gps_points_flight_id.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_igu.device_info_serial)
                           WHERE (((guillemots_gps_points_igu.date_time)>=[guillemots_track_session].[start_date] And (guillemots_gps_points_igu.date_time)<=[guillemots_track_session].[end_date]) AND ((guillemots_gps_points_igu.latitude)<>0) AND ((guillemots_gps_points_igu.longitude)<>0) AND ((guillemots_track_session.device_info_serial)=[guillemots_gps_points_igu].[device_info_serial]))
                           ORDER BY guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time;
                           ",
                           as.is = TRUE)
+
+
+# Columns are the same, but name convention differs - give same names
+# so that row bind works
+names(gpspoints.uva) <- names(gpspoints.igu)
 
 
 # Combine
@@ -73,13 +78,17 @@ flight_col_dist_dif <- flight_col_dist_start <- flight_col_dist_end <- NULL
 flight_dep_id <- NULL
 n_points <- trip_id <- NULL
 flight_duration <- dist_straight <- p2p2_dist <- NULL
-
+trip_id <- NULL
+speed_mean <- speed_median <- speed_max <- NULL
+elev_mean <- elev_median <- elev_max <- elev_min <- NULL
 
 source("deg.dist.R")
+source("m_deg_dist.R")
 
 i <- 12
 
 for(i in 1:length(flight_ids)){
+  for (i in 1:20){
   id <- flight_ids[i]
   points.sub <- subset(gpspoints, gpspoints$flight_id == id)
   n <- n_points[i]  <- length(points.sub$device_info_serial)
@@ -101,38 +110,77 @@ for(i in 1:length(flight_ids)){
   dist_straight[i] <- deg.dist(points.sub$longitude[1],
                                points.sub$latitude[1],
                                points.sub$longitude[n],
-                               points.sub$latitude[n]) 
+                               points.sub$latitude[n],
+                               km = FALSE) 
   
   # point-2-point distance
-  
   p2p2_dist[i] <- sum(m.deg.dist(points.sub$longitude, points.sub$latitude))
   
   # For speeds only include that actual flying points, so only include
   # fixes, where the speed is >5 ms-1
+  f <- points.sub$speed_ms > 5
   # Speed mean
+  speed_mean[i] <- mean(points.sub$speed_ms[f], na.rm = TRUE)
   
   # Speed max
+  speed_max[i] <- max(points.sub$speed_ms[f], na.rm = TRUE)
   
   # Speed median
+  speed_median[i] <- median(points.sub$speed_ms[f], na.rm = TRUE)
   
   # As for speeds - only include the actual flight points here
   # Altitude mean
+  elev_mean[i] <- mean(points.sub$elev[f], na.rm = TRUE)
   
   # Altitude median
+  elev_median[i] <- median(points.sub$elev[f], na.rm = TRUE)
   
   # Altitude max
+  elev_max[i] <- max(points.sub$elev[f], na.rm = TRUE)
   
   # Altitude min
-  
-  
-  
+  elev_min[i] <- min(points.sub$elev[f], na.rm = TRUE)
+
 }
 
 
 # For each trip, label flights by flight number, and type
 # I.e. first, final, other
 
+flight_type
+flight_trip_n
 
+# For each trip
+
+# Filter flights to those that include this trip
+
+# Count number
+
+# Label all these flights to type 'other'
+
+# Then if >= 2
+# Label #1 as 'out'
+# Label #2 as 'in'
+
+# Label all the flights by actual number
+# For i in length of n_flights
+# Label flight_trip_n by i
+
+# End of for each trip
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 
 # Correct data format
@@ -168,7 +216,7 @@ names(flights.df) <- c("flight_id",
 # Output to DB ----
 #will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
 sqlSave(gps.db, trips.df,
-        tablename = "guillemots_gps_trips",
+        tablename = "guillemots_gps_flights",
         append = FALSE, rownames = FALSE, colnames = FALSE,
         verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
         test = FALSE, nastring = NULL,
