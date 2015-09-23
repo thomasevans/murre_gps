@@ -144,27 +144,88 @@ for(i in 1:length(flight_ids)){
 }
 
 
+# Compile flight table (before adding trip details) -----
+
+# Correct data format
+flight_start <- as.POSIXct(flight_start, origin = "1970-01-01",
+                           tz = "UTC")
+flight_end <- as.POSIXct(flight_end, origin = "1970-01-01",
+                         tz = "UTC")
+flight_device_info_serial <- as.factor(flight_device_info_serial)
+flight_ring_number <- as.factor(flight_ring_number)
+flight_dep_id <- as.factor(flight_dep_id)
+flight_id <- as.factor(flight_id)
+
+flights.df <- data.frame(flight_id, flight_ring_number, flight_dep_id,
+                         flight_device_info_serial, flight_start, flight_end,
+                         n_points, flight_col_dist_start,
+                         flight_col_dist_end, flight_col_dist_dif,
+                          trip_id, flight_duration,
+                         dist_straight, p2p2_dist, speed_mean, speed_max, speed_median,
+                         elev_mean, elev_median, elev_max, elev_min)
+
+str(flights.df)
+
+names(flights.df) <- c("flight_id",  "ring_number",  "deploy_id", 
+                         "device_info_serial",  "start_time",  "end_time", 
+                         "n_points",  "col_dist_start", 
+                         "col_dist_end",  "col_dist_dif", 
+                          "trip_id",  "duration", 
+                         "dist_straight",  "p2p2_dist",  "speed_mean",  "speed_max",  "speed_median", 
+                         "alt_mean",  "alt_median",  "alt_max",  "alt_min")
+
+
+str(flights.df)
+
+
+# Add flight type, and number on trip etc ------
 # For each trip, label flights by flight number, and type
 # I.e. first, final, other
+trip_ids <- unique(flights.df$trip_id)
+trip_ids <- trip_ids[trip_ids != 0]
 
-flight_type
-flight_trip_n
+nt <- length(trip_ids)
+
+nf <- length(flights.df$flight_id)
+
+flight_type <- rep("unclassified", nf)
+flight_trip_n <- rep(NA, nf)
+
+i <- 3
 
 # For each trip
+for(i in 1:nt){
+  
+  # Filter flights to those that include this trip
+  id <- trip_ids[i]
+  flights.sub <- subset(flights.df, flights.df$trip_id == id)
+  
+  # Filter of whole flights table
+  f <- flights.df$trip_id == id
+  
+  
+  # Count number
+  n <- length(flights.sub$flight_id)
+  
+  # Label all these flights to type 'other'
+  flight_type[f] <- "other"
+  
+  
+  # Then if >= 2
+  if(n >=2){
+    # Label #1 as 'out'
+    flight_type[f][1] <- "out"
+    # Label #n as 'in'
+    flight_type[f][n] <- "in"    
+  }
 
-# Filter flights to those that include this trip
-
-# Count number
-
-# Label all these flights to type 'other'
-
-# Then if >= 2
-# Label #1 as 'out'
-# Label #2 as 'in'
-
-# Label all the flights by actual number
-# For i in length of n_flights
-# Label flight_trip_n by i
+  
+  # Label all the flights by actual number
+  # For i in length of n_flights
+  # Label flight_trip_n by i
+    
+  
+}
 
 # End of for each trip
 
@@ -181,34 +242,6 @@ flight_trip_n
   
   
   
-
-
-# Correct data format
-flight_start <- as.POSIXct(flight_start, origin = "1970-01-01",
-                         tz = "UTC")
-flight_end <- as.POSIXct(flight_end, origin = "1970-01-01",
-                       tz = "UTC")
-flight_device_info_serial <- as.factor(flight_device_info_serial)
-flight_ring_number <- as.factor(flight_ring_number)
-flight_dep_id <- as.factor(flight_dep_id)
-
-flights.df <- data.frame(flight_id,
-                       flight_device_info_serial,
-                       flight_start,
-                       flight_end,
-                       flight_ring_number,
-                       flight_dep_id,
-                       flight_col_dist)
-
-str(flights.df)
-
-names(flights.df) <- c("flight_id",
-                     "device_info_serial",
-                     "start_time",
-                     "end_time",
-                     "ring_number",
-                     "deploy_id",
-                     "col_dist_max")
 
 
 
