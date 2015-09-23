@@ -85,10 +85,10 @@ elev_mean <- elev_median <- elev_max <- elev_min <- NULL
 source("deg.dist.R")
 source("m_deg_dist.R")
 
-i <- 12
+# i <- 12
 
 for(i in 1:length(flight_ids)){
-  for (i in 1:20){
+#   for (i in 1:20){
   id <- flight_ids[i]
   points.sub <- subset(gpspoints, gpspoints$flight_id == id)
   n <- n_points[i]  <- length(points.sub$device_info_serial)
@@ -191,7 +191,7 @@ nf <- length(flights.df$flight_id)
 flight_type <- rep("unclassified", nf)
 flight_trip_n <- rep(NA, nf)
 
-i <- 3
+# i <- 3
 
 # For each trip
 for(i in 1:nt){
@@ -214,31 +214,31 @@ for(i in 1:nt){
   # Then if >= 2
   if(n >=2){
     # Label #1 as 'out'
-    flight_type[f][1] <- "out"
+    flight_type[f][1] <- "first"
     # Label #n as 'in'
-    flight_type[f][n] <- "in"    
+    flight_type[f][n] <- "final"    
   }
 
   
   # Label all the flights by actual number
   # For i in length of n_flights
-  # Label flight_trip_n by i
-    
+#   x
+  for(x in 1:n){
+    flight_trip_n[f][x] <- x
+  }
+  
   
 }
-
 # End of for each trip
 
 
+# Add these details to the flight table
+flights.df <- cbind(flights.df, flight_type ,flight_trip_n)
   
+  names(flights.df)[22:23] <- c("type", "trip_flight_n") 
   
-  
-  
-  
-  
-  
-  
-  
+str(flights.df)
+  #
   
   
   
@@ -247,8 +247,8 @@ for(i in 1:nt){
 
 
 # Output to DB ----
-#will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
-sqlSave(gps.db, trips.df,
+# will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
+sqlSave(gps.db, flights.df,
         tablename = "guillemots_gps_flights",
         append = FALSE, rownames = FALSE, colnames = FALSE,
         verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
