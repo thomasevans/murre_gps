@@ -81,6 +81,8 @@ flight_duration <- dist_straight <- p2p2_dist <- NULL
 trip_id <- NULL
 speed_mean <- speed_median <- speed_max <- NULL
 elev_mean <- elev_median <- elev_max <- elev_min <- NULL
+device_type <- NULL
+
 
 source("deg.dist.R")
 source("m_deg_dist.R")
@@ -114,33 +116,66 @@ for(i in 1:length(flight_ids)){
                                km = FALSE) 
   
   # point-2-point distance
-  p2p2_dist[i] <- sum(m.deg.dist(points.sub$longitude, points.sub$latitude))
+  if(n >= 2){
+    p2p2_dist[i] <- sum(m.deg.dist(points.sub$longitude, points.sub$latitude))
+  } else  p2p2_dist[i] <- 0
   
   # For speeds only include that actual flying points, so only include
   # fixes, where the speed is >5 ms-1
   f <- points.sub$speed_ms > 5
-  # Speed mean
-  speed_mean[i] <- mean(points.sub$speed_ms[f], na.rm = TRUE)
   
-  # Speed max
-  speed_max[i] <- max(points.sub$speed_ms[f], na.rm = TRUE)
+  if(sum(f) > 1){
+    # Speed mean
+    speed_mean[i] <- mean(points.sub$speed_ms[f], na.rm = TRUE)
+    
+    # Speed max
+    speed_max[i] <- max(points.sub$speed_ms[f], na.rm = TRUE)
+    
+    # Speed median
+    speed_median[i] <- median(points.sub$speed_ms[f], na.rm = TRUE)
+    
+    # As for speeds - only include the actual flight points here
+    # Altitude mean
+    elev_mean[i] <- mean(points.sub$elev[f], na.rm = TRUE)
+    
+    # Altitude median
+    elev_median[i] <- median(points.sub$elev[f], na.rm = TRUE)
+    
+    # Altitude max
+    elev_max[i] <- max(points.sub$elev[f], na.rm = TRUE)
+    
+    # Altitude min
+    elev_min[i] <- min(points.sub$elev[f], na.rm = TRUE)
+        
+  } else {
+    # Speed mean
+    speed_mean[i] <- NA
+    
+    # Speed max
+    speed_max[i] <- NA
+    
+    # Speed median
+    speed_median[i] <- NA
+    
+    # As for speeds - only include the actual flight points here
+    # Altitude mean
+    elev_mean[i] <- NA
+    
+    # Altitude median
+    elev_median[i] <- NA
+    
+    # Altitude max
+    elev_max[i] <- NA
+    
+    # Altitude min
+    elev_min[i] <- NA
+  }
   
-  # Speed median
-  speed_median[i] <- median(points.sub$speed_ms[f], na.rm = TRUE)
+  a <- substring(as.character(flight_device_info_serial[i]), 1, 1)
+  b <- a == "g"
+  if(b){ device_type[i] <- "igu" } else device_type[i] <- "uva"
   
-  # As for speeds - only include the actual flight points here
-  # Altitude mean
-  elev_mean[i] <- mean(points.sub$elev[f], na.rm = TRUE)
   
-  # Altitude median
-  elev_median[i] <- median(points.sub$elev[f], na.rm = TRUE)
-  
-  # Altitude max
-  elev_max[i] <- max(points.sub$elev[f], na.rm = TRUE)
-  
-  # Altitude min
-  elev_min[i] <- min(points.sub$elev[f], na.rm = TRUE)
-
 }
 
 
@@ -155,6 +190,7 @@ flight_device_info_serial <- as.factor(flight_device_info_serial)
 flight_ring_number <- as.factor(flight_ring_number)
 flight_dep_id <- as.factor(flight_dep_id)
 flight_id <- as.factor(flight_id)
+device_type <- as.factor(device_type)
 
 flights.df <- data.frame(flight_id, flight_ring_number, flight_dep_id,
                          flight_device_info_serial, flight_start, flight_end,
@@ -162,7 +198,7 @@ flights.df <- data.frame(flight_id, flight_ring_number, flight_dep_id,
                          flight_col_dist_end, flight_col_dist_dif,
                           trip_id, flight_duration,
                          dist_straight, p2p2_dist, speed_mean, speed_max, speed_median,
-                         elev_mean, elev_median, elev_max, elev_min)
+                         elev_mean, elev_median, elev_max, elev_min, device_type)
 
 str(flights.df)
 
@@ -171,8 +207,14 @@ names(flights.df) <- c("flight_id",  "ring_number",  "deploy_id",
                          "n_points",  "col_dist_start", 
                          "col_dist_end",  "col_dist_dif", 
                           "trip_id",  "duration", 
-                         "dist_straight",  "p2p2_dist",  "speed_mean",  "speed_max",  "speed_median", 
-                         "alt_mean",  "alt_median",  "alt_max",  "alt_min")
+                         "dist_straight",  "p2p2_dist",  "speed_mean",
+                       "speed_max",  "speed_median", 
+                         "alt_mean",  "alt_median",  "alt_max",  "alt_min",
+                       "device_type")
+
+# See how the data looks
+hist(flights.df$dist_straight)
+hist(flights.df$elev_median[flights.df$elev_median >-50 & flights.df$elev_median <100])
 
 
 str(flights.df)
@@ -235,7 +277,7 @@ for(i in 1:nt){
 # Add these details to the flight table
 flights.df <- cbind(flights.df, flight_type ,flight_trip_n)
   
-  names(flights.df)[22:23] <- c("type", "trip_flight_n") 
+  names(flights.df)[23:24] <- c("type", "trip_flight_n") 
   
 str(flights.df)
   #
