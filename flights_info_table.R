@@ -213,9 +213,11 @@ names(flights.df) <- c("flight_id",  "ring_number",  "deploy_id",
                        "device_type")
 
 # See how the data looks
-hist(flights.df$dist_straight)
-hist(flights.df$elev_median[flights.df$elev_median >-50 & flights.df$elev_median <100])
-
+# hist(flights.df$dist_straight)
+# hist(flights.df$alt_median[flights.df$alt_median >-50 & flights.df$alt_median <100])
+# hist(flights.df$alt_median[(flights.df$alt_median >-50) & (flights.df$alt_median <100) &
+#        (flights.df$device_type == "uva")], breaks = 50 )
+# 
 
 str(flights.df)
 
@@ -280,7 +282,9 @@ flights.df <- cbind(flights.df, flight_type ,flight_trip_n)
   names(flights.df)[23:24] <- c("type", "trip_flight_n") 
   
 str(flights.df)
-  #
+  
+summary(flights.df$type)
+#
   
   
   
