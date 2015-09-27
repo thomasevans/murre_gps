@@ -292,14 +292,27 @@ names(new.point.vec3) <- c("wind_dir_track",
 str(new.point.vec3)
 
 # head(new.par)
-gps.data.par.out <- cbind(new.point.vec3, temp2)
+gps.data.par.out <- cbind(gpspoints[,c(1,2,9,10)], head.info, veast, vnorth, ground_track, ground_speed, 
+                          gpspoints$course, new.point.vec3, temp2)
 
+
+# Label 'direction' - direction_new
+names(gps.data.par.out)[13] <- "course_new"
+
+names(gps.data.par.out)
 
 
 str(gps.data.par.out)
-head(gps.data.par.out)
-# length(unique(names(gps.data.par.out))) == length(names(gps.data.par.out))
-names(gps.data.par.out)
+
+
+# Output to new table in the database. ----
+sqlSave(gps.db, gps.data.par.out, tablename = "guillemots_gps_points_components_wind",
+        append = FALSE, rownames = FALSE, colnames = FALSE,
+        verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
+        test = FALSE, nastring = NULL,
+        varTypes =  c(date_time = "datetime"))
+
+
 
 
 
