@@ -83,9 +83,13 @@ wind_10m_flt_ht_mean <- wind_10m_flt_ht_median <- NULL
 library(CircStats)
 
 circ.mean.fun <- function(x){
-  xt <- rad(points.sub$wind_dir)
-  xy <- deg(circ.mean(xt))
-  if(xy <0) return(360 + xy) else return(xy)
+  if(anyNA(x))return(NA)else{
+    xt <- rad(points.sub$wind_dir)
+    xy <- deg(circ.mean(xt))
+    if(is.na(xy))return(NA) else {
+      if(xy <0) return(360 + xy) else return(xy)
+      }
+  }
 }
 
 
