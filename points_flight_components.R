@@ -150,7 +150,7 @@ names(head.info) <- c("head_speed_ecmwf", "head_dir_ecmwf", "head_u_ecmwf", "hea
 
 
 # Ground speed + track heading
-ground_heading <- gpspoints$course
+ground_track <- gpspoints$course
 ground_speed   <- gpspoints$speed_ms
 
 
@@ -164,24 +164,29 @@ bear_cor <- function(x, track){
 }
 
 head_dir <-  mapply(bear_cor,
-                    x = gps.data.par$head_dir_ecmwf,
-                    track = gps.data.par$ground_heading)
+                    x = head.info$head_dir_ecmwf,
+                    track = ground_track)
+hist(head_dir)
+hist(head.info$head_dir_ecmwf)
 
-str(gps.data.par)
+
 wind_dir <-   mapply(bear_cor,
-                     x = gps.data.par$wind_dir_ecmwf,
-                     track = gps.data.par$ground_heading)
+                     x = gpspoints$wind_dir,
+                     track = ground_track)
+hist(wind_dir)
+
+# plot(wind_dir,head_dir)
 
 
+point.vec <- cbind(wind_dir, gpspoints$wind_speed_flt_ht,
+             head_dir, head.info$head_speed_ecmwf,
+             gpspoints$speed_ms)
 
-par <- cbind(wind_dir, gps.data.par$wind_speed_flt_ht_ecmwf,
-             head_dir, gps.data.par$head_speed,
-             gps.data.par$ground_speed)
+point.vec <- as.data.frame(point.vec)
+names(point.vec) <- c("wind_dir","wind_speed","head_dir","head_speed","track_speed")
 
-par <- as.data.frame(par)
-names(par) <- c("wind_dir","wind_speed","head_dir","head_speed","track_speed")
-
-head(par)
+head(point.vec)
+str(point.vec)
 
 
 # Function to get alpha or beta, if angle is reflex then subtract it from 360
@@ -192,11 +197,14 @@ ang.cor <- function(x){
 }
 
 # alpha <- NULL
-alpha <- sapply(X = par$head_dir, FUN = ang.cor)
+alpha <- sapply(X = point.vec$head_dir, FUN = ang.cor)
 
-beta <- sapply(X = par$wind_dir, FUN = ang.cor)
+beta <- sapply(X = point.vec$wind_dir, FUN = ang.cor)
 
-par <- cbind(par, alpha, beta)
+point.vec <- cbind(point.vec, alpha, beta)
+
+# Install CircStats if required
+# install.packages("CircStats")
 
 # side and head wind components
 wind.comp <- function(beta, wind_speed, wind_dir){
@@ -230,20 +238,15 @@ wind.comp <- function(beta, wind_speed, wind_dir){
 }
 
 wind.comp_calc <- mapply(wind.comp,
-                         beta = par$beta,
-                         wind_speed = par$wind_speed,
-                         wind_dir = par$wind_dir) 
+                         beta = point.vec$beta,
+                         wind_speed = point.vec$wind_speed,
+                         wind_dir = point.vec$wind_dir) 
 
 wind.comp_calc_10 <- mapply(wind.comp,
-                            beta = par$beta,
-                            wind_speed = gps.data.par$wind_speed_10m_ecmwf,
-                            wind_dir = par$wind_dir) 
+                            beta = point.vec$beta,
+                            wind_speed = gpspoints$wind_speed_10m,
+                            wind_dir = point.vec$wind_dir) 
 
-
-
-names(gps.data)
-names(gps.data.par)
-alpha.new <- gps.data.par$ground_heading - gps.data.par$head_dir
 
 
 alpha.calc <- function(head, track){
@@ -262,9 +265,41 @@ alpha.calc <- function(head, track){
   return(theta)  
 }
 
-alpha.new <- mapply(alpha.calc, gps.data.par$head_dir, 
-                    gps.data.par$ground_heading)
+alpha.new <- mapply(alpha.calc, point.vec$head_dir, 
+                    ground_track)
+hist(alpha.new)
 
+
+# Merge to dataframe
+temp <- as.data.frame(t(wind.comp_calc))
+names(temp) <- c("wind_side", "wind_head_tail")
+
+# wind.comp_calc_10
+temp2 <- as.data.frame(t(wind.comp_calc_10))
+names(temp2) <- c("wind_side_10", "wind_head_tail_10")
+
+
+
+# Assemble calculated variables ------
+point.vec2 <- cbind(point.vec, temp)
+names(point.vec2)
+new.point.vec2 <- point.vec2[,c(1,3,6:9)]
+new.point.vec3 <- cbind(new.par,alpha.new)
+names(new.point.vec3) <- c("wind_dir_track",
+                    "head_dir_track", "alpha.old",
+                    "beta.old", "wind_side",
+                    "wind_head_tail", "alpha")
+str(new.point.vec3)
+
+# head(new.par)
+gps.data.par.out <- cbind(new.point.vec3, temp2)
+
+
+
+str(gps.data.par.out)
+head(gps.data.par.out)
+# length(unique(names(gps.data.par.out))) == length(names(gps.data.par.out))
+names(gps.data.par.out)
 
 
 
