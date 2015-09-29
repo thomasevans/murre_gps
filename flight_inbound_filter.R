@@ -82,6 +82,8 @@ hist(flights$alt_median[f_all], breaks = 40)
 hist(flights$alt_median[f_all_expoints], breaks = 40)
 
 
+hist(flights$dist_straight[f_all_expoints]/1000)
+
 
 
 
