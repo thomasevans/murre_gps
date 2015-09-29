@@ -124,7 +124,7 @@ for(i in 1:length(flight_ids)){
   # fixes, where the speed is >5 ms-1
   f <- points.sub$ground_speed > 5
   
-  if(sum(f) > 1){
+  # if(sum(f) > 1){
     va_mean[i] <- mean(points.sub$head_speed_ecmwf[f], na.rm = TRUE)
     va_median[i] <- median(points.sub$head_speed_ecmwf[f], na.rm = TRUE)
     va_max[i] <- max(points.sub$head_speed_ecmwf[f], na.rm = TRUE)
@@ -142,23 +142,23 @@ for(i in 1:length(flight_ids)){
     
     
     
-  } else {
-    va_mean[i] <- NA
-    va_median[i] <- NA
-    va_max[i] <- NA
-    va_min[i] <- NA
-    
-    wind_side_mean[i] <- NA
-    wind_side_median[i] <- NA
-    
-    wind_tail_mean[i] <- NA
-    wind_tail_median[i] <- NA
-    
-    wind_10m_flt_ht_mean[i] <- NA
-    wind_10m_flt_ht_median[i] <- NA
-    
-    
-  }
+#   } else {
+#     va_mean[i] <- NA
+#     va_median[i] <- NA
+#     va_max[i] <- NA
+#     va_min[i] <- NA
+#     
+#     wind_side_mean[i] <- NA
+#     wind_side_median[i] <- NA
+#     
+#     wind_tail_mean[i] <- NA
+#     wind_tail_median[i] <- NA
+#     
+#     wind_10m_flt_ht_mean[i] <- NA
+#     wind_10m_flt_ht_median[i] <- NA
+#     
+#     
+#   }
   
 }
 
@@ -220,7 +220,7 @@ str(flights.df)
 # Output to DB ----
 # will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
 sqlSave(gps.db, flights.df,
-        tablename = "guillemots_gps_flights_weather_components",
+        tablename = "guillemots_gps_flights_weather_components_2",
         append = FALSE, rownames = FALSE, colnames = FALSE,
         verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
         test = FALSE, nastring = NULL,
