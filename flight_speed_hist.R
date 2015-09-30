@@ -175,7 +175,7 @@ murre_d_alt_uva <- density(murre_alt_uva, na.rm = TRUE)
 hist(murre_alt, na.rm = TRUE, breaks = 40)
 # ?png
 png("speeds_murre_lbbg_alt.png", width = 1200, height = 600)
-plot(lbbg_d, type = "n", xlim = c(-50,100),
+plot(lbbg_d_alt, type = "n", xlim = c(-50,100),
      ylim = c(0,0.1),
      yaxt = "n", ylab = "",
      xlab = "Altitude (m)",
@@ -184,8 +184,9 @@ plot(lbbg_d, type = "n", xlim = c(-50,100),
      cex.axis = 1.8)
 # ?plot
 polygon(lbbg_d_alt, col = "light blue", lwd = 2)
-polygon(murre_d_alt_uva, col = addalpha("pink", alpha = 0.6), lwd = 2)
-polygon(murre_d_alt_igu, col = addalpha("pink", alpha = 0.6), lwd = 2)
+# polygon(murre_d_alt_uva, col = addalpha("pink", alpha = 0.6), lwd = 2)
+# polygon(murre_d_alt_igu, col = addalpha("pink", alpha = 0.6), lwd = 2)
+polygon(murre_d_alt, col = addalpha("pink", alpha = 0.6), lwd = 2)
 
 # polygon(wind_d, col = addalpha("grey", alpha = 0.6), lwd = 2)
 dev.off()
@@ -196,17 +197,117 @@ x <- murres[murres$alt_median > 50 & !is.na(murres$alt_median),]
 
 
 
+
+
+# Side-ways hist ----
+lbbg_d_alt <- density(lbbg_alt, adjust = .7)
+murre_d_alt <- density(murre_alt, na.rm = TRUE,  adjust = .7)
+resa = 72*4
+png("speeds_murre_lbbg_alt_side.png", res = resa, width = 8*resa, height = 8*resa)
+
+plot(lbbg_d_alt, type = "n", xlim = c(100,-50),
+     ylim = c(0,0.1),
+     yaxt = "n", ylab = "",
+     xlab = " ",
+     main = "",
+     axes = FALSE,
+     cex.lab = 2.0,
+     cex.axis = 1.8,
+     xaxt = "n",
+     las =2)
+axis(side = 1, at = seq(-40,140,20), las = 2, cex = 2, cex.axis = 1.1)
+axis(side = 1, at = seq(-50,150,10), las = 2, 
+     labels=FALSE)
+# axis(side = 1, cex = 2, cex.axis = 1.1)
+
+# cex.lab = 1.4,
+# cex.axis = 1.8)
+
+# ?axis
+# ?plot
+polygon(lbbg_d_alt, col = "light blue", lwd = 2)
+# polygon(murre_d_alt_uva, col = addalpha("pink", alpha = 0.6), lwd = 2)
+# polygon(murre_d_alt_igu, col = addalpha("pink", alpha = 0.6), lwd = 2)
+polygon(murre_d_alt, col = addalpha("pink", alpha = 0.6), lwd = 2)
+
+dev.off()
+# getwd()
+
+
+
+
 # Violin plots -----
 
 
 boxplot(lbbg_alt, na.rm = TRUE)
 
-install.packages("vioplot")
+# install.packages("vioplot")
 library("vioplot")
-vioplot(lbbg_alt, murre_alt[!is.na(murre_alt)], ylim = c(-100,150), h = 3)
-?vioplot
+vioplot(lbbg_alt[!is.na(lbbg_alt)], murre_alt[!is.na(murre_alt)], h = 3,
+        col= c("light blue", "pink"),
+        ylim = c(-50,120))
+#         
+#         ylim = c(-50,120),
+#         # yaxt = "n", ylab = "",
+#         # xlab = " ",
+#         main = "",
+#         axes = FALSE,
+#         cex.lab = 2.0,
+#         cex.axis = 1.8
+#         )
+# ?vioplot
+# ?vioplot
 
 hist(lbbg_alt, breaks = 40)
 
 # Bean plots!!! -------
+install.packages("beanplot")
 
+# Code from http://tagteam.harvard.edu/hub_feeds/1981/feed_items/209875
+library(beanplot)
+beanplot(values ~ group*treatment, ll = 0.04,
+         main = "Bean plot", side = "both",
+         xlab="Treatment",
+         col = list("purple", c("lightblue", "black")),
+         axes=F)
+axis(1, at=c(1, 2),  labels=c("A", "B"))
+axis(2)
+legend("bottomright", fill = c("purple", "lightblue"),
+       legend = c("Group 1", "Group 2"), box.lty=0)
+
+# beanplot2 <- beanplot
+# fix(beanplot2)
+# ?beanplot
+# beanplot::beanplotbeanlines
+beanplot(lbbg_alt, murre_alt[!is.na(murre_alt)], ll = 0,
+         main = "Bean plot", side = "both",
+         col = list("light blue", "pink"),
+         axes=F,
+         ylim = c(-50,150),
+         beanlinewd = 3,
+         what = c(F,T,F,T)
+         )
+axis(2)
+
+# line(h = 0)
+
+# axis(1, at=c(-1, 1),  labels=c("LBBG", "Murre"))
+axis(2)
+# legend("bottomright", fill = c("purple", "lightblue"),
+       # legend = c("Group 1", "Group 2"), box.lty=0)
+
+
+
+# Va vs wind -------
+plot(murres$va_median[murre_f]~ murres$wind_tail_mean[murre_f])
+
+
+
+# Alt vs wind -----
+plot(murres$alt_max[murre_f]~ murres$wind_tail_mean[murre_f],
+     ylim = c(-20,50))
+
+median(murres$alt_median[murre_f &
+                         murres$wind_tail_mean[murre_f] <0])
+median(murres$alt_max[murre_f &
+                         murres$wind_tail_mean[murre_f] >0])
