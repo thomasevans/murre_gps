@@ -87,28 +87,35 @@ library(RColorBrewer)
 # Coastline data
 load("SWE_adm0.RData")
 
-par(mfrow=c(1,1))
-par( mar = c(5, 4, 4, 2))
-#   par(bg = 'white')
 
-col.green <- brewer.pal(5,"Greens")
-col.blue <- brewer.pal(5,"Blues")
+map.base.fun <- function(xlim = c(17,18.3), ylim =  c(57,57.7)){
+  par(mfrow=c(1,1))
+  par( mar = c(5, 4, 4, 2))
+  #   par(bg = 'white')
+  
+  col.green <- brewer.pal(5,"Greens")
+  col.blue <- brewer.pal(5,"Blues")
+  
+  
+  plot(gadm, xlim = xlim,
+       ylim = ylim, col= col.green[2], bg = col.blue[1],
+       lty = 0)
+  
+  ## Scale bar and axis
+  box(col="dark grey",lwd=3)
+  axis(side=(1),las=1,col="dark grey",col.axis="dark grey")
+  axis(side=(2),las=1,col="dark grey",col.axis="dark grey")
+  
+}
 
 
-plot(gadm, xlim = c(17,18.3),
-     ylim = c(57,57.7), col= col.green[2], bg = col.blue[1],
-     lty = 0)
+# hack map.scale function
+# map.scale2 <- map.scale
+# fix(map.scale2)
+source("map.scale2.R")
 
 
-
-
-
-
-## Scale bar and axis
-box(col="dark grey",lwd=3)
-axis(side=(1),las=1,col="dark grey",col.axis="dark grey")
-axis(side=(2),las=1,col="dark grey",col.axis="dark grey")
-
+# Plot lbbg all flights ----
 
 
 lbbg_flight_ids <- unique(gps_lbbg$flight_id)
@@ -119,7 +126,11 @@ col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
 
 
 # Plot all LBBG flights
-i <- 12
+resa = 72*4
+png("lbbg_all_large_scale.png", res = resa, width = 8*resa, height = 8*resa)
+# ?png
+map.base.fun(xlim = c(17.0, 18.3), ylim = c(56.7, 57.6))
+# i <- 12
 for(i in 1:length(lbbg_flight_ids)){
   
   x <- lbbg_flight_ids[i]
@@ -130,12 +141,27 @@ for(i in 1:length(lbbg_flight_ids)){
            gps.sub$longitude[1:n-1], gps.sub$latitude[1:n-1],
            col = col.vec.al.rand[i], lty = 1, lwd = 1)
 }
+map.scale2(ratio = FALSE, col = "grey40", line.col = "grey40", lwd.line = 2,
+           relwidth = 0.25, cex = 1.2)
+dev.off()
+# ?map.scale
 
+# Plot murre - all flights -----
 murre_flight_ids <- unique(gps_murre.f$flight_id)
 col.vec <- rainbow(length(murre_flight_ids))
 
 col.vec.al <- addalpha(col.vec, alpha = 0.3)
 col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
+
+
+
+resa = 72*4
+png("murre_all_large_scale.png", res = resa, width = 8*resa, height = 8*resa)
+# ?png
+map.base.fun(xlim = c(17.0, 18.3), ylim = c(56.7, 57.6))
+
+png("murre_all_small_scale.png", res = resa, width = 8*resa, height = 8*resa)
+map.base.fun(xlim = c(17.1, 18.2), ylim = c(57, 57.6))
 
 for(i in 1:length(murre_flight_ids)){
   
@@ -147,17 +173,129 @@ for(i in 1:length(murre_flight_ids)){
            gps.sub$longitude[1:n-1], gps.sub$latitude[1:n-1],
            col = col.vec.al.rand[i], lty = 1, lwd = 1)
 }
+map.scale2(ratio = FALSE, col = "grey40", line.col = "grey40", lwd.line = 2,
+           relwidth = 0.25, cex = 1.2)
+dev.off()
+
+# Sample flights only ------
+
+# 10 lbbg
+lbbg.sub <- c(29534,428,16683,16341,35108,16014,32821,36693,37708,2918)
 
 
-map.scale(ratio = FALSE)
+resa = 72*4
+png("lbbg_10.png", res = resa, width = 6*resa, height = 8*resa)
+# ?png
+map.base.fun(xlim = c(17.1, 18.2), ylim = c(56.8, 57.7))
+# i <- 12
+for(i in 1:10){
+  
+  x <- lbbg.sub[i]
+  # ?subset
+  gps.sub <- gps_lbbg[gps_lbbg$flight_id == x,]
+  n <- length(gps.sub$longitude)
+  segments(gps.sub$longitude[-1], gps.sub$latitude[-1],
+           gps.sub$longitude[1:n-1], gps.sub$latitude[1:n-1],
+           col = col.vec.al.rand[i], lty = 1, lwd = 3)
+}
+map.scale2(ratio = FALSE, col = "grey40", line.col = "grey40", lwd.line = 2,
+           relwidth = 0.25, cex = 1.2)
+dev.off()
 
+
+
+# 10 murres
+murre.sub <- sample(murre_flight_ids,10)
+murre.sub <- c(140,1148,958,643,456,822,833,1194,640,543)
+
+png("murre_10.png", res = resa, width = 8*resa, height = 8*resa)
+map.base.fun(xlim = c(17.1, 18.2), ylim = c(56.8, 57.7))
+
+for(i in 1:10){
+  
+  x <- murre.sub[i]
+  # ?subset
+  gps.sub <- gps_murre.f[gps_murre.f$flight_id == x,]
+  n <- length(gps.sub$longitude)
+  segments(gps.sub$longitude[-1], gps.sub$latitude[-1],
+           gps.sub$longitude[1:n-1], gps.sub$latitude[1:n-1],
+           col = col.vec.al.rand[i], lty = 1, lwd = 3)
+}
+map.scale2(ratio = FALSE, col = "grey40", line.col = "grey40", lwd.line = 2,
+           relwidth = 0.25, cex = 1.2)
+dev.off()
+
+
+
+
+
+# 10 lbbg + 10 murres
+png("murre_lbbg_10.png", res = resa, width = 8*resa, height = 8*resa)
+map.base.fun(xlim = c(17.1, 18.2), ylim = c(56.8, 57.7))
+
+png("murre_lbbg_10_oblong.png", res = resa, width = 6*resa, height = 8*resa)
+map.base.fun(xlim = c(17.1, 18.2), ylim = c(56.8, 57.7))
+
+
+mag.trans <- addalpha("#c51b8a", alpha = 0.3)
+for(i in 1:10){
+  
+  x <- murre.sub[i]
+  # ?subset
+  gps.sub <- gps_murre.f[gps_murre.f$flight_id == x,]
+  n <- length(gps.sub$longitude)
+  segments(gps.sub$longitude[-1], gps.sub$latitude[-1],
+           gps.sub$longitude[1:n-1], gps.sub$latitude[1:n-1],
+           col = mag.trans, lty = 1, lwd = 3)
+}
+
+for(i in 1:10){
+  blu.trans <- addalpha("#3182bd", alpha = 0.3)
+  
+  x <- lbbg.sub[i]
+  # ?subset
+  gps.sub <- gps_lbbg[gps_lbbg$flight_id == x,]
+  n <- length(gps.sub$longitude)
+  segments(gps.sub$longitude[-1], gps.sub$latitude[-1],
+           gps.sub$longitude[1:n-1], gps.sub$latitude[1:n-1],
+           col = blu.trans, lty = 1, lwd = 3)
+}
+
+map.scale2(ratio = FALSE, col = "grey40", line.col = "grey40", lwd.line = 2,
+           relwidth = 0.25, cex = 1.2)
+dev.off()
 
 
 
 
 # Location maps -----
 # World maps
-map('world', project = "mollweide")
-map('world', project = "globular")
-map('world', project = "gilbert")
-points(mapproject(list(y=59, x=20)), col= "red", cex=2, pch = 8)
+
+col.green <- brewer.pal(5,"Greens")
+col.blue <- brewer.pal(5,"Blues")
+
+png("world_location.png", res = resa, width = 8*resa, height = 8*resa)
+# map('world', project = "mollweide", fill = 1, col = col.green[2], bg = col.blue[1])
+map('world', project = "globular", fill = 1, col = col.green[2], bg = col.blue[1])
+# map('world', project = "gilbert", fill = 1, col = col.green[2], bg = col.blue[1])
+points(mapproject(list(y=59, x=20)), col = blu.trans, bg = mag.trans, cex = 4, pch = 21)
+dev.off()
+
+
+# Region map
+library("mapdata")
+png("regional_location.png", res = resa, width = 8*resa, height = 8*resa)
+# ?png
+map('worldHires', xlim = c(-5,30), ylim = c(50,65),
+    col=col.green[2], bg =  col.blue[1],
+    fill = TRUE,lty = 0)
+# ?polygons
+# c(17.1, 18.2), ylim = c(56.8, 57.7)
+rect(17.1, 56.8, 18.2, 57.7, density = NULL, angle = 45,
+     col = mag.trans, border = blu.trans, lwd = 3)
+## Scale bar and axis
+box(col="dark grey",lwd=3)
+# axis(side=(1),las=1,col="dark grey",col.axis="dark grey")
+# axis(side=(2),las=1,col="dark grey",col.axis="dark grey")
+# ?map
+dev.off()
