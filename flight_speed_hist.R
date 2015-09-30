@@ -58,7 +58,7 @@ summary(murre_f)
 # summary(murre_f)
 
 
-# speeds ----
+# ** speeds ----
 murre_vg <- murres$speed_median[murre_f]
 lbbg_vg <- lbbg$speed_inst_med
 wind_lbbg <- lbbg$windspeed
@@ -140,7 +140,11 @@ dev.off()
 
 
 
-# altitude ----
+
+
+
+
+# ** altitude ----
 murre_alt_uva <- murres$alt_median[murre_f & murres$device_type == "uva"]
 murre_alt_igu <- murres$alt_median[murre_f & murres$device_type == "igu"]
 murre_alt <- murres$alt_median[murre_f]
@@ -203,3 +207,6 @@ vioplot(lbbg_alt, murre_alt[!is.na(murre_alt)], ylim = c(-100,150), h = 3)
 ?vioplot
 
 hist(lbbg_alt, breaks = 40)
+
+# Bean plots!!! -------
+
