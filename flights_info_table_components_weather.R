@@ -73,6 +73,8 @@ device_type <- NULL
 va_mean <- va_median <- va_max <- va_min <- NULL
 wind_side_mean <- wind_side_median <- NULL
 wind_tail_mean <- wind_tail_median <- NULL
+wind_side_10_mean <- wind_side_10_median <- NULL
+wind_tail_10_mean <- wind_tail_10_median <- NULL
 cloud_tot_mean <- NULL
 temp_k_mean <- NULL
 wind_10m_mean <- NULL
@@ -136,6 +138,14 @@ for(i in 1:length(flight_ids)){
     wind_tail_mean[i] <- mean(points.sub$wind_head_tail[f], na.rm = TRUE)
     wind_tail_median[i] <- median(points.sub$wind_head_tail[f], na.rm = TRUE)
     
+    wind_side_10_mean[i] <- mean(points.sub$wind_side_10[f], na.rm = TRUE)
+    wind_side_10_median[i] <- median(points.sub$wind_side_10[f], na.rm = TRUE)
+    
+    wind_tail_10_mean[i] <- mean(points.sub$wind_head_tail_10[f], na.rm = TRUE)
+    wind_tail_10_median[i] <- median(points.sub$wind_head_tail_10[f], na.rm = TRUE)
+    
+    
+    
     wind_10m_flt_ht_mean[i] <- mean(points.sub$wind_speed_flt_ht[f], na.rm = TRUE)
     wind_10m_flt_ht_median[i] <- median(points.sub$wind_speed_flt_ht[f], na.rm = TRUE)
     
@@ -180,6 +190,8 @@ flights.df <- data.frame(flight_id, flight_dep_id,
                          va_mean, va_median, va_max, va_min,
                          wind_side_mean, wind_side_median,
                          wind_tail_mean, wind_tail_median,
+                         wind_side_10_mean, wind_side_10_median,
+                         wind_tail_10_mean, wind_tail_10_median,
                          cloud_tot_mean,
                          temp_k_mean,
                          wind_10m_mean,
@@ -196,6 +208,8 @@ names(flights.df) <- c("flight_id",  "deploy_id",
                        "va_mean", "va_median", "va_max", "va_min",
                        "wind_side_mean", "wind_side_median",
                        "wind_tail_mean", "wind_tail_median",
+                       "wind_side_10_mean", "wind_side_10_median",
+                       "wind_tail_10_mean", "wind_tail_10_median",
                        "cloud_tot_mean",
                        "temp_k_mean",
                        "wind_10m_mean",
@@ -220,7 +234,7 @@ str(flights.df)
 # Output to DB ----
 # will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
 sqlSave(gps.db, flights.df,
-        tablename = "guillemots_gps_flights_weather_components_2",
+        tablename = "guillemots_gps_flights_weather_components_3",
         append = FALSE, rownames = FALSE, colnames = FALSE,
         verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
         test = FALSE, nastring = NULL,
