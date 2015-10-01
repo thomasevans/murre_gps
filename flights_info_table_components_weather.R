@@ -80,7 +80,7 @@ temp_k_mean <- NULL
 wind_10m_mean <- NULL
 wind_dir_mean <- NULL
 wind_10m_flt_ht_mean <- wind_10m_flt_ht_median <- NULL
-
+ecmwf_pressure_sea_lev_mean <- NULL
 
 library(CircStats)
 
@@ -117,6 +117,7 @@ for(i in 1:length(flight_ids)){
   # Weather components
   cloud_tot_mean[i] <- mean(points.sub$ecmwf_cloud_cov_tot, na.rm = TRUE)
   temp_k_mean[i] <- mean(points.sub$ecmwf_temp_2m, na.rm = TRUE)
+  ecmwf_pressure_sea_lev_mean[i] <- mean(points.sub$ecmwf_pressure_sea_lev_mean, na.rm = TRUE)
   wind_10m_mean[i] <- mean(points.sub$wind_speed_10m, na.rm = TRUE)
   
   wind_dir_mean[i] <- circ.mean.fun(points.sub$wind_dir)
@@ -194,6 +195,7 @@ flights.df <- data.frame(flight_id, flight_dep_id,
                          wind_tail_10_mean, wind_tail_10_median,
                          cloud_tot_mean,
                          temp_k_mean,
+                         ecmwf_pressure_sea_lev_mean,
                          wind_10m_mean,
                          wind_dir_mean,
                          wind_10m_flt_ht_mean,
@@ -212,6 +214,7 @@ names(flights.df) <- c("flight_id",  "deploy_id",
                        "wind_tail_10_mean", "wind_tail_10_median",
                        "cloud_tot_mean",
                        "temp_k_mean",
+                       "ecmwf_pressure_sea_lev_mean",
                        "wind_10m_mean",
                        "wind_dir_mean",
                        "wind_10m_flt_ht_mean",
@@ -234,7 +237,7 @@ str(flights.df)
 # Output to DB ----
 # will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
 sqlSave(gps.db, flights.df,
-        tablename = "guillemots_gps_flights_weather_components_3",
+        tablename = "guillemots_gps_flights_weather_components_4",
         append = FALSE, rownames = FALSE, colnames = FALSE,
         verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
         test = FALSE, nastring = NULL,
