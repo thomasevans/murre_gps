@@ -78,6 +78,8 @@ lbbg.sub <- cbind.data.frame(lbbg$flight_id,
                              lbbg$wind_head_tail_mean,
                              lbbg$wind_head_tail_mean_10,
                              lbbg$ground_speed_median,
+                             lbbg$head_speed_mean,
+                             lbbg$head_speed_median,
                              lbbg$cloud_cover_totalmean,
                              lbbg$temperature_2mmean,
                              lbbg$sea_level_pressuremean,
@@ -94,16 +96,80 @@ murre.sub <- cbind.data.frame(murres$flight_id,
                               murres$wind_tail_mean,
                               murres$wind_tail_10_mean,
                               murres$speed_median,
+                              murres$va_mean,
+                              murres$va_median,
                               murres$cloud_tot_mean,
                               murres$temp_k_mean,
                               murres$ecmwf_pressure_sea_lev_mean,
                               murres$species)
+
 names(lbbg.sub) <- names(murre.sub)
 flights.all <- rbind.data.frame(lbbg.sub,murre.sub)
+names(flights.all) <- c("flight_id",
+                        "start_time",
+                        "duration",
+                        "device_info_serial",
+                        "dist_straight",
+                        "alt_median",
+                        "wind_side_mean",
+                        "wind_side_10_mean",
+                        "wind_tail_mean",
+                        "wind_tail_10_mean",
+                        "speed_median",
+                        "va_mean",
+                        "va_median",
+                        "cloud_tot_mean",
+                        "temp_k_mean",
+                        "ecmwf_pressure_sea_lev_mean",
+                        "species")
+
+
+# Add head/ tail wind dummy variable
+sign.wind <- sign(flights.all$wind_tail_10_mean)
+wind.type <- (as.factor(sign.wind))
+summary(wind.type)
+
+
+flights.all <- cbind.data.frame(flights.all,wind.type)
+
+
+
+
+# Plotting -------
+library("ggplot2")
 
 
 # Plot data for va vs. head-tail wind ----------
 
+# Sub-set for altitude analysis
+# Remove NAs and extreme outliers >150 or <-50
+flights.all.alt <- flights.all[(
+  !is.na(flights.all$alt_median) &
+    flights.all$alt_median > -50 &
+    flights.all$alt_median < 150 &
+    !is.na(flights.all$wind.type)
+),]
+
+
+resa = 72*4
+png("alt_head_tail_ggplot.png", res = resa, width = 8*resa, height = 6*resa)
+# ?png
+ggplot(flights.all.alt, aes(wind_tail_10_mean, alt_median, color = factor(species), 
+                # shape = factor(year), 
+                linetype = factor(wind.type)))+
+  geom_point(alpha = 60/100, colour="white", size = 2) +
+  geom_point(alpha = 70/100, size = 1.5)+
+  scale_colour_manual(values=c("#3182bd", "#c51b8a"))+
+  stat_smooth(method = "glm", size = 1.5)+
+  # geom_line(size = 2)+
+  scale_x_continuous(limits = c(-10, 10))+
+  scale_y_continuous(limits = c(-25, 100)) +
+  theme(legend.position="none") +
+  theme(axis.text=element_text(size=18),
+         axis.title=element_text(size=20,face="bold")) +
+  labs(x = expression(paste("Wind speed (ms",""^{-1}, ")")), y = paste("Flight altitude (m)"))
+# ?stat_smooth
+dev.off()
 
 
 
@@ -113,6 +179,37 @@ flights.all <- rbind.data.frame(lbbg.sub,murre.sub)
 
 
 # Plot data for alt vs. head-tail wind -------
+
+# Sub-set for va analysis
+# Remove NAs and extreme outliers >150 or <-50
+flights.all.va <- flights.all[(
+  !is.na(flights.all$va_median) &
+    flights.all$va_median < 40 &
+    !is.na(flights.all$wind.type)
+),]
+
+
+resa = 72*4
+png("va_head_tail_ggplot.png", res = resa, width = 8*resa, height = 6*resa)
+# ?png
+ggplot(flights.all.va, aes(wind_tail_10_mean, va_median, color = factor(species), 
+                            # shape = factor(year), 
+                            linetype = factor(wind.type)))+
+  geom_point(alpha = 60/100, colour="white", size = 2) +
+  geom_point(alpha = 70/100, size = 1.5)+
+  scale_colour_manual(values=c("#3182bd", "#c51b8a"))+
+  stat_smooth(method = "glm", size = 1.5)+
+  # geom_line(size = 2)+
+  scale_x_continuous(limits = c(-10, 10))+
+  scale_y_continuous(limits = c(5, 20)) +
+  theme(legend.position="none") +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  labs(x = expression(paste("Wind speed (ms",""^{-1}, ")")),
+       y = expression(paste("Air speed (ms",""^{-1}, ")")))
+# ?stat_smooth
+dev.off()
+
 
 
 
