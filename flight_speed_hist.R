@@ -42,13 +42,18 @@ murres <- sqlQuery(gps.db,
                           as.is = TRUE)
 
 
+# 
+# f_dist_col <- murres$col_dist_dif < -1000
+# f_final <- murres$type == "final"
+# f_va_alt <- !is.na(murres$va_mean) & !is.na(murres$alt_mean)
+# murre_f <- f_dist_col & f_final & f_va_alt
+# summary(murre_f)
 
 f_dist_col <- murres$col_dist_dif < -1000
 f_final <- murres$type == "final"
 f_va_alt <- !is.na(murres$va_mean) & !is.na(murres$alt_mean)
-murre_f <- f_dist_col & f_final & f_va_alt
-summary(murre_f)
-
+f_move <- murres$dist_straight > 3500
+murre_f <- f_dist_col & f_final & f_va_alt & f_move
 
 
 
@@ -84,7 +89,7 @@ summary(is.na(murre_vg))
 # Combined histogram ----
 lbbg_d <- density(lbbg_vg)
 murre_d <- density(murre_vg, na.rm = TRUE)
-wind_all_d <- density(c(wind_lbbg, wing_murre))
+wind_all_d <- density(c(wind_lbbg, wind_murre))
 # wind_m_d <- density(wing_murre)
 # ?density
 
@@ -137,7 +142,7 @@ axis(side = 1, cex = 2, cex.axis = 1.1)
 dev.off()
 
 
-
+# getwd()
 
 
 
