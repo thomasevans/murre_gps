@@ -310,3 +310,83 @@ box(col="dark grey",lwd=4)
 # axis(side=(2),las=1,col="dark grey",col.axis="dark grey")
 # ?map
 dev.off()
+
+
+
+# Breeding success etc ----
+# chick weight plots ------
+ch_weight <- read.csv(file = "MurreChickWeights98-15.csv", header = TRUE)
+
+library(ggplot2)
+library(grid)
+
+# install.packages("ggplot2")
+
+pdf("wsc_chick_weight.pdf",  width = 8, height = 8)
+p <- ggplot(ch_weight, aes(Yr, chick_wt))
+p +   # scale_x_continuous(limits = c(2005,2015))+
+  geom_smooth( lwd = 1, col = "grey60") +
+  geom_vline(xintercept = 2009, color = rainbow_hcl(3)[1],
+             linetype = "longdash", size = 2) +
+  geom_vline(xintercept = 2014, color = rainbow_hcl(3)[2],
+             linetype = "longdash", size = 2) +
+  geom_vline(xintercept = 2015, color = rainbow_hcl(3)[3],
+             linetype = "longdash", size = 2) +
+  geom_point(
+    ylim = c(210, 255),
+    xlim = c(1988,2015),
+    size = I(4)) +
+  labs(x = "Year", y = "Chick weight (g)") +
+  theme( axis.text  = element_text(size=16),
+         axis.title = element_text(size=20)) +
+  scale_x_continuous(breaks=c(seq(2005,2015,2)),
+                     limits = c(2005,2015)) +
+  scale_y_continuous(breaks=c(seq(220,255,5)),
+                     limits = c(215,257)) +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  theme(axis.title.x=element_text(vjust=-1)) +
+  theme(axis.title.y=element_text(angle=90, vjust=2)) +
+  theme(plot.title=element_text(size=15, vjust=3)) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm"))
+# ?labs
+# ?geom_smooth
+dev.off()
+# ?seq
+
+
+
+
+
+
+pdf("wsc_chick_fledge.pdf",  width = 8, height = 8)
+p <- ggplot(ch_weight, aes(Yr, fledg_suc))
+p +   # scale_x_continuous(limits = c(2005,2015))+
+  geom_smooth( lwd = 1, col = "grey60") +
+  geom_vline(xintercept = 2009, color = rainbow_hcl(3)[1],
+             linetype = "longdash", size = 2) +
+  geom_vline(xintercept = 2014, color = rainbow_hcl(3)[2],
+             linetype = "longdash", size = 2) +
+  geom_vline(xintercept = 2015, color = rainbow_hcl(3)[3],
+             linetype = "longdash", size = 2) +
+  geom_point(
+    ylim = c(60, 90),
+    xlim = c(1988,2015),
+    size = I(4)) +
+  labs(x = "Year", y = "Breeding success (%)") +
+  theme( axis.text  = element_text(size=16),
+         axis.title = element_text(size=20)) +
+  scale_x_continuous(breaks=c(seq(2005,2015,2)),
+                     limits = c(2005,2015)) +
+  scale_y_continuous(breaks=c(seq(60,90,5)),
+                     limits = c(60,90)) +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  theme(axis.title.x=element_text(vjust=-1)) +
+  theme(axis.title.y=element_text(angle=90, vjust=2)) +
+  theme(plot.title=element_text(size=15, vjust=3)) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm"))
+# ?labs
+# ?geom_smooth
+dev.off()
+# ?seq
