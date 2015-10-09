@@ -12,9 +12,16 @@ vignettes/*.pdf
 murre_gps.Rproj
 .RData
 SWE_adm0.RData
-
 # image files
 *.png
 *.pdf
 *.jpg
 *.wmf
+bsbd-0.9.3.grd
+bsbd-0.9.3_full.grd
+wsc_bath.ps
+wsc_bath2.ps
+wsc_chick_fledge.ps
+wsc_chick_weight.ps
+wsc_coldist.ps
+wsc_depth.ps
