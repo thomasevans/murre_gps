@@ -322,7 +322,8 @@ library(grid)
 
 # install.packages("ggplot2")
 
-pdf("wsc_chick_weight.pdf",  width = 8, height = 8)
+# pdf("wsc_chick_weight.pdf",  width = 8, height = 8)
+cairo_ps("wsc_chick_weight.ps",  width = 8, height = 8)
 p <- ggplot(ch_weight, aes(Yr, chick_wt))
 p +   # scale_x_continuous(limits = c(2005,2015))+
   geom_smooth( lwd = 1, col = "grey60") +
@@ -354,12 +355,15 @@ p +   # scale_x_continuous(limits = c(2005,2015))+
 dev.off()
 # ?seq
 
+# ggsave(filename = "test.pdf", plot = p2, width = 6, height = 6)
+# ?ggsave
 
 
 
 
+cairo_ps("wsc_chick_fledge.ps",  width = 8, height = 8)
 
-pdf("wsc_chick_fledge.pdf",  width = 8, height = 8)
+# pdf("wsc_chick_fledge.pdf",  width = 8, height = 8)
 p <- ggplot(ch_weight, aes(Yr, fledg_suc))
 p +   # scale_x_continuous(limits = c(2005,2015))+
   geom_smooth( lwd = 1, col = "grey60") +
@@ -393,7 +397,7 @@ dev.off()
 
 
 
-# Weighting criterion for GPS locations --------
+# ******** Weighting criterion for GPS locations --------
 
 # Add column for time interval (note will be wrong between tags - but go with it anyway...)
 # ?difftime
@@ -491,21 +495,25 @@ gps.all.dist.new <- gps.all.dist[gps.all.dist$ground_speed < 5 & gps.all.dist$co
 
 
 # Weight years
-tot09 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2009])
-gps.all.dist.new$weight[gps.all.dist.new$years == 2009] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2009]/tot09
-tot14 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2014])
-gps.all.dist.new$weight[gps.all.dist.new$years == 2014] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2014]/tot14
-tot15 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2015])
-gps.all.dist.new$weight[gps.all.dist.new$years == 2015] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2015]/tot15
+# tot09 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2009])
+# gps.all.dist.new$weight[gps.all.dist.new$years == 2009] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2009]/tot09
+# tot14 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2014])
+# gps.all.dist.new$weight[gps.all.dist.new$years == 2014] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2014]/tot14
+# tot15 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2015])
+# gps.all.dist.new$weight[gps.all.dist.new$years == 2015] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2015]/tot15
 
 
 gps.all.dist.new$years <- factor(gps.all.dist.new$years,levels(gps.all.dist.new$years)[c(4,3,2,1)])
 
 # ?geom_density
 
-pdf("wsc_coldist.pdf",  width = 8, height = 8)
-ggplot(gps.all.dist.new, aes(x=coldist/1000, weight = weight/sum(weight),
-                             fill=factor(years), y = ..scaled..
+# *** col dist ------
+
+# pdf("wsc_coldist.pdf",  width = 8, height = 8)
+cairo_ps("wsc_coldist.ps",  width = 8, height = 8)
+
+ggplot(gps.all.dist.new, aes(x = coldist/1000, weight = weight/sum(weight),
+                             fill = factor(years), y = ..scaled..
 )) +
   geom_density(alpha = 0.6) +
   scale_fill_manual(values=rainbow_hcl(3)[c(2,3,1)])+
@@ -524,3 +532,122 @@ ggplot(gps.all.dist.new, aes(x=coldist/1000, weight = weight/sum(weight),
   theme(plot.title=element_text(size=15, vjust=3)) +
   theme(plot.margin = unit(c(1,1,1,1), "cm"))
 dev.off()
+
+
+
+
+
+
+
+# Bathymetry data -------
+library("raster")
+bath_raster <- raster("bsbd-0.9.3.grd")
+
+
+xy.gps <- cbind(gps.all.dist.new$longitude, gps.all.dist.new$latitude)
+
+# Extract bathymetry data for these positions
+gps.bath <- extract(bath_raster,xy.gps)
+
+gps.all.dist.new$bath <- gps.bath
+
+hist(gps.bath)
+
+# summary(is.na(gps.all.dist.new$bath))
+
+# pdf("wsc_coldist.pdf",  width = 8, height = 8)
+cairo_ps("wsc_depth.ps",  width = 8, height = 8)
+
+ggplot(gps.all.dist.new, aes(x = bath, weight = weight/sum(weight),
+                             fill = factor(years), y = ..scaled..
+)) +
+  geom_density(alpha = 0.6) +
+  scale_fill_manual(values=rainbow_hcl(3)[c(2,3,1)])+
+  # scale_colour_manual(values=c("#3182bd", "#c51b8a"))+
+  # scale_x_continuous(limits = c(-10, 10))+
+  # scale_y_continuous(limits = c(-25, 100)) +
+  theme(legend.position="none") +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  labs(x = "Water depth (m)",
+       y = "Density (scaled)") +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  theme(axis.title.x=element_text(vjust=-1)) +
+  theme(axis.title.y=element_text(angle=90, vjust=2)) +
+  theme(plot.title=element_text(size=15, vjust=3)) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  coord_flip()
+dev.off()
+
+
+
+
+# Mapping bathymetry ------
+
+pal <- choose_palette()
+
+?cairo_ps
+
+cairo_ps("wsc_bath2.ps",  width = 7, height = 7,  bg = NA)
+# png("test_bath.png")
+  par(mfrow=c(1,1))
+  par( mar = c(5, 4, 4, 5))
+  par(col.sub = "white",
+      col.main = "white",
+      col.lab = "white",
+      col.axis = "white")
+
+  
+  cxlim <- c(17,18.2) 
+  cylim <-  c(56.9,57.5)
+  
+  plot(gadm, xlim = cxlim,
+       ylim = cylim, col= "grey40", bg = NA,
+       lty = 0, add = FALSE)
+  plot(bath_raster, xlim = c(16,19),
+       ylim = c(56.5,58), col= pal(50), bg = NA,
+       lty = 0, add = TRUE)
+  plot(gadm, xlim = xlim,
+       ylim = ylim, col= "grey40", bg = NA,
+       lty = 0, add = TRUE)
+  
+  
+  axis(side=(1),las=1,col="white",col.axis="white",col.ticks = "white")
+  axis(side=(2),las=1,col="white",col.axis="white",col.ticks = "white")
+  box(col= box.col,lwd= box.lwd)
+  axis(side=(1),las=1,col="white",col.axis="white",col.ticks = "white")
+  axis(side=(2),las=1,col="white",col.axis="white",col.ticks = "white")
+  box.col <- "white"
+  box.lwd <- 6
+  box(col= box.col,lwd= box.lwd)
+  
+  dev.off()
+  
+  
+  
+  
+col.pal <- function (n, h = c(300, 200), c. = c(60, 0), l = c(25, 95), power = c(0.7, 
+                                                                                 1.3), fixup = TRUE, gamma = NULL, alpha = 1, ...) {
+  if (!is.null(gamma)) 
+    warning("'gamma' is deprecated and has no effect")
+  if (n < 1L) 
+    return(character(0L))
+  h <- rep(h, length.out = 2L)
+  c <- rep(c., length.out = 2L)
+  l <- rep(l, length.out = 2L)
+  power <- rep(power, length.out = 2L)
+  rval <- seq(1, 0, length = n)
+  rval <- hex(polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
+                       C = c[2L] - diff(c) * rval^power[1L], H = h[2L] - diff(h) * 
+                         rval), fixup = fixup, ...)
+  if (!missing(alpha)) {
+    alpha <- pmax(pmin(alpha, 1), 0)
+    alpha <- format(as.hexmode(round(alpha * 255 + 1e-04)), 
+                    width = 2L, upper.case = TRUE)
+    rval <- paste(rval, alpha, sep = "")
+  }
+  return(rval)
+}  
+  
+
