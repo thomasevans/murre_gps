@@ -30,7 +30,7 @@ gps.db <- odbcConnectAccess2007('D:/Dropbox/tracking_db/murre_db/murre_db.accdb'
 # Get uva data
 gpspoints.uva <- sqlQuery(gps.db,
                           query = "SELECT uvabits_gps.device_info_serial, uvabits_gps.date_time, uvabits_gps.latitude, uvabits_gps.longitude, guillemots_gps_points_trip_id.trip_id, guillemots_gps_points_trip_id.deploy_id, guillemots_gps_points_flight_id.flight_id, guillemots_gps_points_movebank_ECMWF_calc.wind_dir, guillemots_gps_points_components_wind.ground_speed, guillemots_gps_points_movebank_ECMWF_calc.wind_speed_10m, guillemots_gps_points_components_wind.alpha, guillemots_gps_points_components_wind.wind_side_10, guillemots_gps_points_components_wind.wind_head_tail_10, guillemots_gps_points_components_wind.wind_side, guillemots_gps_points_components_wind.wind_head_tail, guillemots_gps_points_movebank_ecmwf.ecmwf_cloud_cov_tot, guillemots_gps_points_movebank_ecmwf.ecmwf_pressure_sea_lev, guillemots_gps_points_movebank_ecmwf.ecmwf_temp_2m, guillemots_gps_points_components_wind.head_dir_ecmwf, guillemots_gps_points_components_wind.head_speed_ecmwf, guillemots_gps_points_movebank_ECMWF_calc.wind_speed_flt_ht, guillemots_gps_points_uva_class.coldist, guillemots_track_session.ring_number
-FROM guillemots_track_session, (((guillemots_gps_points_flight_id INNER JOIN (guillemots_gps_points_trip_id INNER JOIN (guillemots_gps_points_uva_class INNER JOIN uvabits_gps ON (guillemots_gps_points_uva_class.device_info_serial = uvabits_gps.device_info_serial) AND (guillemots_gps_points_uva_class.date_time = uvabits_gps.date_time)) ON (guillemots_gps_points_trip_id.date_time = uvabits_gps.date_time) AND (guillemots_gps_points_trip_id.device_info_serial = uvabits_gps.device_info_serial)) ON (guillemots_gps_points_flight_id.date_time = guillemots_gps_points_trip_id.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_trip_id.device_info_serial)) INNER JOIN guillemots_gps_points_movebank_ECMWF_calc ON (uvabits_gps.device_info_serial = guillemots_gps_points_movebank_ECMWF_calc.device_info_serial) AND (uvabits_gps.date_time = guillemots_gps_points_movebank_ECMWF_calc.date_time)) INNER JOIN guillemots_gps_points_components_wind ON (guillemots_gps_points_movebank_ECMWF_calc.device_info_serial = guillemots_gps_points_components_wind.device_info_serial) AND (guillemots_gps_points_movebank_ECMWF_calc.date_time = guillemots_gps_points_components_wind.date_time)) INNER JOIN guillemots_gps_points_movebank_ecmwf ON (guillemots_gps_points_components_wind.device_info_serial = guillemots_gps_points_movebank_ecmwf.device_info_serial) AND (guillemots_gps_points_components_wind.date_time = guillemots_gps_points_movebank_ecmwf.date_time)
+                          FROM guillemots_track_session, (((guillemots_gps_points_flight_id INNER JOIN (guillemots_gps_points_trip_id INNER JOIN (guillemots_gps_points_uva_class INNER JOIN uvabits_gps ON (guillemots_gps_points_uva_class.device_info_serial = uvabits_gps.device_info_serial) AND (guillemots_gps_points_uva_class.date_time = uvabits_gps.date_time)) ON (guillemots_gps_points_trip_id.date_time = uvabits_gps.date_time) AND (guillemots_gps_points_trip_id.device_info_serial = uvabits_gps.device_info_serial)) ON (guillemots_gps_points_flight_id.date_time = guillemots_gps_points_trip_id.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_trip_id.device_info_serial)) INNER JOIN guillemots_gps_points_movebank_ECMWF_calc ON (uvabits_gps.device_info_serial = guillemots_gps_points_movebank_ECMWF_calc.device_info_serial) AND (uvabits_gps.date_time = guillemots_gps_points_movebank_ECMWF_calc.date_time)) INNER JOIN guillemots_gps_points_components_wind ON (guillemots_gps_points_movebank_ECMWF_calc.device_info_serial = guillemots_gps_points_components_wind.device_info_serial) AND (guillemots_gps_points_movebank_ECMWF_calc.date_time = guillemots_gps_points_components_wind.date_time)) INNER JOIN guillemots_gps_points_movebank_ecmwf ON (guillemots_gps_points_components_wind.device_info_serial = guillemots_gps_points_movebank_ecmwf.device_info_serial) AND (guillemots_gps_points_components_wind.date_time = guillemots_gps_points_movebank_ecmwf.date_time)
                           WHERE (((uvabits_gps.date_time)>=[guillemots_track_session].[start_date] And (uvabits_gps.date_time)<=[guillemots_track_session].[end_date]) AND ((uvabits_gps.latitude)<>0) AND ((uvabits_gps.longitude)<>0) AND ((guillemots_track_session.device_info_serial)=[uvabits_gps].[device_info_serial]))
                           ORDER BY uvabits_gps.device_info_serial, uvabits_gps.date_time;
                           ",
@@ -40,7 +40,7 @@ FROM guillemots_track_session, (((guillemots_gps_points_flight_id INNER JOIN (gu
 # Get igu data
 gpspoints.igu <- sqlQuery(gps.db,
                           query = "SELECT guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time, guillemots_gps_points_igu.latitude, guillemots_gps_points_igu.longitude, guillemots_gps_points_trip_id.trip_id, guillemots_gps_points_trip_id.deploy_id, guillemots_gps_points_flight_id.flight_id, guillemots_gps_points_movebank_ECMWF_calc.wind_dir, guillemots_gps_points_components_wind.ground_speed, guillemots_gps_points_movebank_ECMWF_calc.wind_speed_10m, guillemots_gps_points_components_wind.alpha, guillemots_gps_points_components_wind.wind_side_10, guillemots_gps_points_components_wind.wind_head_tail_10, guillemots_gps_points_components_wind.wind_side, guillemots_gps_points_components_wind.wind_head_tail, guillemots_gps_points_movebank_ecmwf.ecmwf_cloud_cov_tot, guillemots_gps_points_movebank_ecmwf.ecmwf_pressure_sea_lev, guillemots_gps_points_movebank_ecmwf.ecmwf_temp_2m, guillemots_gps_points_components_wind.head_dir_ecmwf, guillemots_gps_points_components_wind.head_speed_ecmwf, guillemots_gps_points_movebank_ECMWF_calc.wind_speed_flt_ht, guillemots_gps_points_igu_class.coldist, guillemots_track_session.ring_number
-FROM guillemots_track_session, (((guillemots_gps_points_flight_id INNER JOIN (guillemots_gps_points_trip_id INNER JOIN (guillemots_gps_points_igu_class INNER JOIN guillemots_gps_points_igu ON (guillemots_gps_points_igu_class.device_info_serial = guillemots_gps_points_igu.device_info_serial) AND (guillemots_gps_points_igu_class.date_time = guillemots_gps_points_igu.date_time)) ON (guillemots_gps_points_trip_id.date_time = guillemots_gps_points_igu.date_time) AND (guillemots_gps_points_trip_id.device_info_serial = guillemots_gps_points_igu.device_info_serial)) ON (guillemots_gps_points_flight_id.date_time = guillemots_gps_points_trip_id.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_trip_id.device_info_serial)) INNER JOIN guillemots_gps_points_movebank_ECMWF_calc ON (guillemots_gps_points_igu.device_info_serial = guillemots_gps_points_movebank_ECMWF_calc.device_info_serial) AND (guillemots_gps_points_igu.date_time = guillemots_gps_points_movebank_ECMWF_calc.date_time)) INNER JOIN guillemots_gps_points_components_wind ON (guillemots_gps_points_movebank_ECMWF_calc.device_info_serial = guillemots_gps_points_components_wind.device_info_serial) AND (guillemots_gps_points_movebank_ECMWF_calc.date_time = guillemots_gps_points_components_wind.date_time)) INNER JOIN guillemots_gps_points_movebank_ecmwf ON (guillemots_gps_points_components_wind.device_info_serial = guillemots_gps_points_movebank_ecmwf.device_info_serial) AND (guillemots_gps_points_components_wind.date_time = guillemots_gps_points_movebank_ecmwf.date_time)
+                          FROM guillemots_track_session, (((guillemots_gps_points_flight_id INNER JOIN (guillemots_gps_points_trip_id INNER JOIN (guillemots_gps_points_igu_class INNER JOIN guillemots_gps_points_igu ON (guillemots_gps_points_igu_class.device_info_serial = guillemots_gps_points_igu.device_info_serial) AND (guillemots_gps_points_igu_class.date_time = guillemots_gps_points_igu.date_time)) ON (guillemots_gps_points_trip_id.date_time = guillemots_gps_points_igu.date_time) AND (guillemots_gps_points_trip_id.device_info_serial = guillemots_gps_points_igu.device_info_serial)) ON (guillemots_gps_points_flight_id.date_time = guillemots_gps_points_trip_id.date_time) AND (guillemots_gps_points_flight_id.device_info_serial = guillemots_gps_points_trip_id.device_info_serial)) INNER JOIN guillemots_gps_points_movebank_ECMWF_calc ON (guillemots_gps_points_igu.device_info_serial = guillemots_gps_points_movebank_ECMWF_calc.device_info_serial) AND (guillemots_gps_points_igu.date_time = guillemots_gps_points_movebank_ECMWF_calc.date_time)) INNER JOIN guillemots_gps_points_components_wind ON (guillemots_gps_points_movebank_ECMWF_calc.device_info_serial = guillemots_gps_points_components_wind.device_info_serial) AND (guillemots_gps_points_movebank_ECMWF_calc.date_time = guillemots_gps_points_components_wind.date_time)) INNER JOIN guillemots_gps_points_movebank_ecmwf ON (guillemots_gps_points_components_wind.device_info_serial = guillemots_gps_points_movebank_ecmwf.device_info_serial) AND (guillemots_gps_points_components_wind.date_time = guillemots_gps_points_movebank_ecmwf.date_time)
                           WHERE (((guillemots_gps_points_igu.date_time)>=[guillemots_track_session].[start_date] And (guillemots_gps_points_igu.date_time)<=[guillemots_track_session].[end_date]) AND ((guillemots_gps_points_igu.latitude)<>0) AND ((guillemots_gps_points_igu.longitude)<>0) AND ((guillemots_track_session.device_info_serial)=[guillemots_gps_points_igu].[device_info_serial]))
                           ORDER BY guillemots_gps_points_igu.device_info_serial, guillemots_gps_points_igu.date_time;
                           ",
@@ -128,8 +128,8 @@ map.base.fun <- function(xlim = c(17,18.3), ylim =  c(56.8,57.7),
   
   ## Scale bar and axis
   # box(col= box.col,lwd= box.lwd)
-  axis(side=(1),las=1,col="black",col.axis="black")
-  axis(side=(2),las=1,col="black",col.axis="black")
+  axis(side=(1),las=1,col="white",col.axis="white",col.ticks = "white")
+  axis(side=(2),las=1,col="white",col.axis="white",col.ticks = "white")
   box(col= box.col,lwd= box.lwd)
   
 }
@@ -171,11 +171,11 @@ map.base.fun(box.col = rainbow_hcl(3)[1],
              box.lwd = 6)
 
 for(ib in 1:b){
-
+  
   trips <- unique(gpspoints$trip_id[f2009 & gpspoints$ring_number == birds[ib]])
   t <- length(trips)
   
-    for(i in 1:t){
+  for(i in 1:t){
     
     x <- trips[i]
     # ?subset
@@ -313,7 +313,7 @@ dev.off()
 
 
 
-# Breeding success etc ----
+# ******* 2. Breeding success etc ----
 # chick weight plots ------
 ch_weight <- read.csv(file = "MurreChickWeights98-15.csv", header = TRUE)
 
@@ -328,9 +328,9 @@ p +   # scale_x_continuous(limits = c(2005,2015))+
   geom_smooth( lwd = 1, col = "grey60") +
   geom_vline(xintercept = 2009, color = rainbow_hcl(3)[1],
              linetype = "longdash", size = 2) +
-  geom_vline(xintercept = 2014, color = rainbow_hcl(3)[2],
+  geom_vline(xintercept = 2014, color = rainbow_hcl(3)[3],
              linetype = "longdash", size = 2) +
-  geom_vline(xintercept = 2015, color = rainbow_hcl(3)[3],
+  geom_vline(xintercept = 2015, color = rainbow_hcl(3)[2],
              linetype = "longdash", size = 2) +
   geom_point(
     ylim = c(210, 255),
@@ -365,9 +365,9 @@ p +   # scale_x_continuous(limits = c(2005,2015))+
   geom_smooth( lwd = 1, col = "grey60") +
   geom_vline(xintercept = 2009, color = rainbow_hcl(3)[1],
              linetype = "longdash", size = 2) +
-  geom_vline(xintercept = 2014, color = rainbow_hcl(3)[2],
+  geom_vline(xintercept = 2014, color = rainbow_hcl(3)[3],
              linetype = "longdash", size = 2) +
-  geom_vline(xintercept = 2015, color = rainbow_hcl(3)[3],
+  geom_vline(xintercept = 2015, color = rainbow_hcl(3)[2],
              linetype = "longdash", size = 2) +
   geom_point(
     ylim = c(60, 90),
@@ -390,3 +390,137 @@ p +   # scale_x_continuous(limits = c(2005,2015))+
 # ?geom_smooth
 dev.off()
 # ?seq
+
+
+
+# Weighting criterion for GPS locations --------
+
+# Add column for time interval (note will be wrong between tags - but go with it anyway...)
+# ?difftime
+
+n <- length(gpspoints$date_time)
+t.interval <- difftime(gpspoints$date_time[-1], gpspoints$date_time[-n])
+hist(as.numeric(t.interval), xlim = c(-1000,1000))
+
+t.interval <- as.numeric(t.interval)
+t.interval[t.interval < 0] <- NA
+t.interval[t.interval > 800] <- NA
+
+hist(t.interval)
+t.interval <- c(NA, t.interval)
+
+gpspoints$interval <- t.interval
+
+
+# By year
+
+# 2009
+
+gps.sub <- gpspoints[f2009,]
+
+birds <- unique(gps.sub$ring_number)
+b <- length(birds)
+
+gps.sub$weight <- NA
+
+# str(gps.sub)
+
+for(i in 1:b){
+  fb <- gps.sub$ring_number == birds[i]
+  t.tot <- sum(gps.sub$interval[fb], na.rm = TRUE)
+  gps.sub$weight[fb] <- gps.sub$interval[fb]/t.tot
+  
+}
+
+
+gps.all.dist <- gps.sub
+
+
+# 2014
+gps.sub <- gpspoints[f2014,]
+
+birds <- unique(gps.sub$ring_number)
+b <- length(birds)
+
+gps.sub$weight <- NA
+
+# str(gps.sub)
+
+for(i in 1:b){
+  fb <- gps.sub$ring_number == birds[i]
+  t.tot <- sum(gps.sub$interval[fb], na.rm = TRUE)
+  gps.sub$weight[fb] <- gps.sub$interval[fb]/t.tot
+  
+}
+
+
+gps.all.dist <- rbind.data.frame(gps.all.dist,gps.sub)
+
+
+# 2015
+gps.sub <- gpspoints[f2015,]
+
+birds <- unique(gps.sub$ring_number)
+b <- length(birds)
+
+gps.sub$weight <- NA
+
+# str(gps.sub)
+
+for(i in 1:b){
+  fb <- gps.sub$ring_number == birds[i]
+  t.tot <- sum(gps.sub$interval[fb], na.rm = TRUE)
+  gps.sub$weight[fb] <- gps.sub$interval[fb]/t.tot
+  
+}
+
+
+gps.all.dist <- rbind.data.frame(gps.all.dist,gps.sub)
+
+
+
+
+
+
+
+
+# hist(gps.sub$ground_speed)
+
+gps.all.dist.new <- gps.all.dist[gps.all.dist$ground_speed < 5 & gps.all.dist$coldist > 1500 &
+                                   !is.na(gps.all.dist$weight),]
+
+
+# Weight years
+tot09 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2009])
+gps.all.dist.new$weight[gps.all.dist.new$years == 2009] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2009]/tot09
+tot14 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2014])
+gps.all.dist.new$weight[gps.all.dist.new$years == 2014] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2014]/tot14
+tot15 <- sum(gps.all.dist.new$weight[gps.all.dist.new$years == 2015])
+gps.all.dist.new$weight[gps.all.dist.new$years == 2015] <- gps.all.dist.new$weight[gps.all.dist.new$years == 2015]/tot15
+
+
+gps.all.dist.new$years <- factor(gps.all.dist.new$years,levels(gps.all.dist.new$years)[c(4,3,2,1)])
+
+# ?geom_density
+
+pdf("wsc_coldist.pdf",  width = 8, height = 8)
+ggplot(gps.all.dist.new, aes(x=coldist/1000, weight = weight/sum(weight),
+                             fill=factor(years), y = ..scaled..
+)) +
+  geom_density(alpha = 0.6) +
+  scale_fill_manual(values=rainbow_hcl(3)[c(2,3,1)])+
+  # scale_colour_manual(values=c("#3182bd", "#c51b8a"))+
+  # scale_x_continuous(limits = c(-10, 10))+
+  # scale_y_continuous(limits = c(-25, 100)) +
+  theme(legend.position="none") +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  labs(x = "Distance from colony (km)",
+       y = "Density (scaled)") +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  theme(axis.title.x=element_text(vjust=-1)) +
+  theme(axis.title.y=element_text(angle=90, vjust=2)) +
+  theme(plot.title=element_text(size=15, vjust=3)) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm"))
+dev.off()
