@@ -510,7 +510,7 @@ gps.all.dist.new$years <- factor(gps.all.dist.new$years,levels(gps.all.dist.new$
 # *** col dist ------
 
 # pdf("wsc_coldist.pdf",  width = 8, height = 8)
-cairo_ps("wsc_coldist.ps",  width = 8, height = 8)
+cairo_ps("wsc_coldist2.ps",  width = 12, height = 8)
 
 ggplot(gps.all.dist.new, aes(x = coldist/1000, weight = weight/sum(weight),
                              fill = factor(years), y = ..scaled..
@@ -542,8 +542,11 @@ dev.off()
 # Bathymetry data -------
 library("raster")
 bath_raster <- raster("bsbd-0.9.3.grd")
-
-
+# install.packages("rgdal")
+# install.packages("ncdf4", type = "source")
+# Difficult to install for some reason - in the end installed from
+# http://cirrus.ucsd.edu/~pierce/ncdf/
+# ?install.packages
 xy.gps <- cbind(gps.all.dist.new$longitude, gps.all.dist.new$latitude)
 
 # Extract bathymetry data for these positions
@@ -556,7 +559,7 @@ hist(gps.bath)
 # summary(is.na(gps.all.dist.new$bath))
 
 # pdf("wsc_coldist.pdf",  width = 8, height = 8)
-cairo_ps("wsc_depth.ps",  width = 8, height = 8)
+cairo_ps("wsc_depth2.ps",  width = 6, height = 8)
 
 ggplot(gps.all.dist.new, aes(x = bath, weight = weight/sum(weight),
                              fill = factor(years), y = ..scaled..
@@ -580,6 +583,9 @@ ggplot(gps.all.dist.new, aes(x = bath, weight = weight/sum(weight),
   coord_flip()
 dev.off()
 
+
+unique(cbind.data.frame(gps.all.dist.new$ring_number,
+                        gps.all.dist.new$years))
 
 
 
@@ -649,5 +655,269 @@ col.pal <- function (n, h = c(300, 200), c. = c(60, 0), l = c(25, 95), power = c
   }
   return(rval)
 }  
-  
 
+
+
+
+
+# ************ Dive depth data ---------
+  
+# Import 2009 data ----
+
+files <- list.files(path = 
+                      "D:/Dropbox/Guillemots/guillemot_2009_data/guillemot_2009_dive_data/2009_depth",
+                    pattern = ".TXT",
+                    all.files = FALSE,
+                    full.names = FALSE, recursive = FALSE,
+                    ignore.case = FALSE, include.dirs = FALSE)
+files
+# Vector of device IDs
+fun.wrap <- function(x){
+  # strsplit(x, split = ".txt" )[[1]][1]
+  substr(x, 1, 6)
+}
+
+ring_number_09 <- sapply(X = files, FUN = fun.wrap)
+names(ring_number_09) <- NULL
+
+# 
+# # Source functions
+# source("parse_igotu2gpx_txt.R")
+
+# Parse all files
+n <- length(files)
+
+parse.list <- list()
+i <- 1
+for(i in 1:n){
+  temp <- read.table(paste("D:/Dropbox/Guillemots/guillemot_2009_data/guillemot_2009_dive_data/2009_depth/",
+    files[i], sep = ""), sep = "\t")
+  x <- cbind(temp,ring_number_09[i],files[i],"2009")
+  parse.list[[i]] <- x
+}
+
+# Combine all into single data frame
+points.df <- do.call("rbind", parse.list)
+str(points.df)
+names(points.df) <- c("date_time", "depth_db", "ring_number", "file_name", "year")
+
+str(points.df)
+
+
+t <- strptime(as.character(points.df$date_time), format = "%d/%m/%y %H:%M:%S", tz = "UTC")
+points.df$date_time <- as.POSIXct(t , tz = "UTC")
+
+points.df$depth_db[points.df$ring_number == "AAK959"] <- 
+  points.df$depth_db[points.df$ring_number == "AAK959"] - 8.85
+
+# 
+hist(points.df$depth_db)
+f <- points.df$depth_db >5
+hist(points.df$depth_db[f], breaks = 100, xlim = c(0,100))
+# 
+# f <- points.df$depth_db >8   &   points.df$depth_db < 10
+# points.df$depth_db[f]
+# 
+# summary(points.df$ring_number[points.df$depth_db > 45  &
+#                                 points.df$depth_db < 55])
+# 
+# 
+f <- points.df$depth_db >5   &  points.df$ring_number != "AAK963"
+#   points.df$ring_number != "AAK963"
+hist(points.df$depth_db[f], breaks = 100, xlim = c(0,100))
+# 
+# 
+# points.aak963 <- points.df[points.df$ring_number == "AAK959",]
+# hist(points.aak963$depth_db,  breaks = 100, xlim = c(0,90), ylim = c(0,40000))
+# hist(points.aak963$depth_db,  breaks = 100, xlim = c(5,40), ylim = c(0,40000))
+# hist(points.aak963$depth_db[1:100000], breaks = 100, xlim = c(5,40), ylim = c(0,40000))
+# hist(points.aak963$depth_db[1:200000], breaks = 100, xlim = c(5,40), ylim = c(0,40000))
+# hist(points.aak963$depth_db[200000:300000], breaks = 100, xlim = c(5,40), ylim = c(0,10000))
+# hist(points.aak963$depth_db[400000:408900], breaks = 100, xlim = c(5,40), ylim = c(0,1000))
+# min(points.aak963$depth_db)
+
+
+
+# Import 2015 data ------
+
+files <- list.files(path = 
+                      "D:/Dropbox/Guillemots/2015/2015_depth/2015_depth_edit/",
+                    pattern = ".csv",
+                    all.files = FALSE,
+                    full.names = FALSE, recursive = FALSE,
+                    ignore.case = FALSE, include.dirs = FALSE)
+files
+# Vector of device IDs
+fun.wrap <- function(x){
+  # strsplit(x, split = ".txt" )[[1]][1]
+  substr(x, 27, 32)
+}
+
+ring_number_15 <- sapply(X = files, FUN = fun.wrap)
+names(ring_number_15) <- NULL
+ring_number_15 <- toupper(ring_number_15)
+# 
+# # Source functions
+# source("parse_igotu2gpx_txt.R")
+
+# Parse all files
+n <- length(files)
+
+parse.list <- list()
+i <- 1
+for(i in 1:n){
+  temp <- read.table(paste("D:/Dropbox/Guillemots/2015/2015_depth/2015_depth_edit/",
+                           files[i], sep = ""), sep = ",",
+                     skip = 3)
+  x <- cbind(temp,ring_number_15[i],files[i],"2015")
+  parse.list[[i]] <- x
+}
+
+# Combine all into single data frame
+points.df.2015 <- do.call("rbind", parse.list)
+str(points.df.2015)
+
+
+
+names(points.df.2015) <- c("idx", "date", "time", "depth_db",
+                           "temp_c", "wet_dry", "ring_number",
+                           "file_name", "year")
+
+str(points.df.2015)
+
+t_comb <- paste(points.df.2015$date, points.df.2015$time, sep = " ")
+str(t_comb)
+# t <- strptime((t_comb), format = "%d/%m/%y %H:%M:%S", tz = "UTC")
+date_time_2015 <- as.POSIXct(t_comb , tz = "UTC")
+# head(test2)
+points.df.2015.new <- cbind.data.frame(date_time_2015,
+                                       points.df.2015$depth_db,
+                                       points.df.2015$ring_number,
+                                       points.df.2015$file_name,
+                                       points.df.2015$year)
+
+# hist(points.df.2015.new$points.df.2015$depth_db)
+names(points.df.2015.new) <- names(points.df)
+
+hist(points.df.2015.new$depth_db, xlim = c(-10,100), ylim = c(0,10000), breaks = 100)
+hist(points.df.2015.new$depth_db, xlim = c(-10,100), ylim = c(0,20000), breaks = 100)
+hist(points.df.2015.new$depth_db, xlim = c(39,49), ylim = c(0,5000), breaks = 1000)
+
+
+
+
+# Combine the two years -------
+dive_all <- rbind(points.df, points.df.2015.new)
+
+summary(dive_all$ring_number)
+summary(points.df$ring_number)
+summary(points.df.2015.new$ring_number)
+
+# Do weighting thing ----
+
+
+
+
+
+n <- length(dive_all$date_time)
+t.interval <- difftime(dive_all$date_time[-1], dive_all$date_time[-n])
+# hist(as.numeric(t.interval), xlim = c(-1000,1000))
+
+t.interval <- as.numeric(t.interval)
+t.interval[t.interval < 0] <- NA
+t.interval[t.interval > 100] <- NA
+
+hist(t.interval)
+t.interval <- c(NA, t.interval)
+
+dive_all$interval <- t.interval
+
+
+# By year
+
+# 2009
+
+dive_all.sub <- dive_all[dive_all$year == "2009",]
+
+birds <- unique(dive_all.sub$ring_number)
+b <- length(birds)
+
+dive_all.sub$weight <- NA
+
+# str(gps.sub)
+i <- 1
+for(i in 1:b){
+  fb <- dive_all.sub$ring_number == birds[i]
+  t.tot <- sum(dive_all.sub$interval[fb], na.rm = TRUE)
+  dive_all.sub$weight[fb] <- dive_all.sub$interval[fb]/t.tot
+  
+}
+
+
+dive_all.new <- dive_all.sub
+
+
+# 2015
+# str(dive_all$year)
+dive_all.sub <- dive_all[dive_all$year == "2015",]
+
+birds <- unique(dive_all.sub$ring_number)
+b <- length(birds)
+
+dive_all.sub$weight <- NA
+
+# str(gps.sub)
+i <- 1
+for(i in 1:b){
+  fb <- dive_all.sub$ring_number == birds[i]
+  t.tot <- sum(dive_all.sub$interval[fb], na.rm = TRUE)
+  dive_all.sub$weight[fb] <- dive_all.sub$interval[fb]/t.tot
+  
+}
+# summary(fb)
+dive_all.new <- rbind.data.frame(dive_all.new,dive_all.sub)
+
+# x <- dive_all.sub$ring_number[is.na(fb)]
+# head(x)
+
+hist(dive_all.new$depth_db[dive_all.new$depth_db > 5])
+# max(dive_all.new$depth_db[dive_all.new$depth_db > 5])
+# Filter data ----
+dive_all.new_f <- dive_all.new[dive_all.new$ring_number != "AAK963" &
+                                   !is.na(dive_all.new$weight) &
+                                   dive_all.new$depth_db > 5
+                                 ,]
+
+# dive_all.new_f$years <- factor(gps.all.dist.new$years,levels(gps.all.dist.new$years)[c(4,3,2,1)])
+
+str(dive_all.new_f)
+# Plot dive depth data -------
+cairo_ps("wsc_depth_dives2.ps",  width = 6, height = 8)
+
+ggplot(dive_all.new_f, aes(x = -depth_db, weight = weight/sum(weight),
+                             fill = factor(year), y = ..scaled..
+)) +
+  geom_density(alpha = 0.6) +
+  scale_fill_manual(values=rainbow_hcl(3)[c(1,2)])+
+  # scale_colour_manual(values=c("#3182bd", "#c51b8a"))+
+  # scale_x_continuous(limits = c(-10, 10))+
+  # scale_y_continuous(limits = c(-25, 100)) +
+  theme(legend.position="none") +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  labs(x = "Time at depth (m)",
+       y = "Density (scaled)") +
+  theme(axis.text=element_text(size=18),
+        axis.title=element_text(size=20,face="bold")) +
+  theme(axis.title.x=element_text(vjust=-1)) +
+  theme(axis.title.y=element_text(angle=90, vjust=2)) +
+  theme(plot.title=element_text(size=15, vjust=3)) +
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  scale_x_continuous(breaks=c(seq(-100,0, 20)),
+                     limits = c(-100,0)) +
+  coord_flip()
+dev.off()
+
+
+all_rec <- cbind.data.frame(dive_all.new_f$ring_number,dive_all.new_f$year)
+unique(all_rec)
