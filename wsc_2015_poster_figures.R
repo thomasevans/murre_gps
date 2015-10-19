@@ -323,7 +323,7 @@ library(grid)
 # install.packages("ggplot2")
 
 # pdf("wsc_chick_weight.pdf",  width = 8, height = 8)
-cairo_ps("wsc_chick_weight.ps",  width = 8, height = 8)
+cairo_ps("wsc_chick_weight_new.ps",  width = 8, height = 8)
 p <- ggplot(ch_weight, aes(Yr, chick_wt))
 p +   # scale_x_continuous(limits = c(2005,2015))+
   geom_smooth( lwd = 1, col = "grey60") +
@@ -344,8 +344,8 @@ p +   # scale_x_continuous(limits = c(2005,2015))+
                      limits = c(2005,2015)) +
   scale_y_continuous(breaks=c(seq(220,255,5)),
                      limits = c(215,257)) +
-  theme(axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold")) +
+  theme(axis.text=element_text(size=25),
+        axis.title=element_text(size=30,face="bold")) +
   theme(axis.title.x=element_text(vjust=-1)) +
   theme(axis.title.y=element_text(angle=90, vjust=2)) +
   theme(plot.title=element_text(size=15, vjust=3)) +
@@ -361,7 +361,7 @@ dev.off()
 
 
 
-cairo_ps("wsc_chick_fledge.ps",  width = 8, height = 8)
+cairo_ps("wsc_chick_fledge_new.ps",  width = 8, height = 8)
 
 # pdf("wsc_chick_fledge.pdf",  width = 8, height = 8)
 p <- ggplot(ch_weight, aes(Yr, fledg_suc))
@@ -384,8 +384,11 @@ p +   # scale_x_continuous(limits = c(2005,2015))+
                      limits = c(2005,2015)) +
   scale_y_continuous(breaks=c(seq(60,90,5)),
                      limits = c(60,90)) +
-  theme(axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold")) +
+  # theme(axis.text=element_text(size=18),
+        # axis.title=element_text(size=20,face="bold")) +
+  theme(axis.text=element_text(size=25),
+        axis.title=element_text(size=30,face="bold")) +
+  
   theme(axis.title.x=element_text(vjust=-1)) +
   theme(axis.title.y=element_text(angle=90, vjust=2)) +
   theme(plot.title=element_text(size=15, vjust=3)) +
@@ -510,7 +513,7 @@ gps.all.dist.new$years <- factor(gps.all.dist.new$years,levels(gps.all.dist.new$
 # *** col dist ------
 
 # pdf("wsc_coldist.pdf",  width = 8, height = 8)
-cairo_ps("wsc_coldist2.ps",  width = 12, height = 8)
+cairo_ps("wsc_coldist2_new.ps",  width = 12, height = 8)
 
 ggplot(gps.all.dist.new, aes(x = coldist/1000, weight = weight/sum(weight),
                              fill = factor(years), y = ..scaled..
@@ -524,9 +527,12 @@ ggplot(gps.all.dist.new, aes(x = coldist/1000, weight = weight/sum(weight),
   theme(axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold")) +
   labs(x = "Distance from colony (km)",
-       y = "Density (scaled)") +
-  theme(axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold")) +
+       y = "Relative frequency") +
+  # theme(axis.text=element_text(size=18),
+        # axis.title=element_text(size=20,face="bold")) +
+  theme(axis.text=element_text(size=25),
+        axis.title=element_text(size=30,face="bold")) +
+  
   theme(axis.title.x=element_text(vjust=-1)) +
   theme(axis.title.y=element_text(angle=90, vjust=2)) +
   theme(plot.title=element_text(size=15, vjust=3)) +
@@ -559,7 +565,7 @@ hist(gps.bath)
 # summary(is.na(gps.all.dist.new$bath))
 
 # pdf("wsc_coldist.pdf",  width = 8, height = 8)
-cairo_ps("wsc_depth2.ps",  width = 6, height = 8)
+cairo_ps("wsc_depth2_new.ps",  width = 6, height = 8)
 
 ggplot(gps.all.dist.new, aes(x = bath, weight = weight/sum(weight),
                              fill = factor(years), y = ..scaled..
@@ -573,10 +579,13 @@ ggplot(gps.all.dist.new, aes(x = bath, weight = weight/sum(weight),
   theme(axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold")) +
   labs(x = "Water depth (m)",
-       y = "Density (scaled)") +
-  theme(axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold")) +
-  theme(axis.title.x=element_text(vjust=-1)) +
+       y = "Relative frequency") +
+  # theme(axis.text=element_text(size=18),
+        # axis.title=element_text(size=20,face="bold")) +
+  theme(axis.text=element_text(size=25),
+        axis.title=element_text(size=30,face="bold")) +
+  
+    theme(axis.title.x=element_text(vjust=-1)) +
   theme(axis.title.y=element_text(angle=90, vjust=2)) +
   theme(plot.title=element_text(size=15, vjust=3)) +
   theme(plot.margin = unit(c(1,1,1,1), "cm")) +
@@ -892,7 +901,7 @@ dive_all.new_f <- dive_all.new[dive_all.new$ring_number != "AAK963" &
 
 str(dive_all.new_f)
 # Plot dive depth data -------
-cairo_ps("wsc_depth_dives2.ps",  width = 6, height = 8)
+cairo_ps("wsc_depth_dives2_new.ps",  width = 6, height = 8)
 
 ggplot(dive_all.new_f, aes(x = -depth_db, weight = weight/sum(weight),
                              fill = factor(year), y = ..scaled..
@@ -906,10 +915,12 @@ ggplot(dive_all.new_f, aes(x = -depth_db, weight = weight/sum(weight),
   theme(axis.text=element_text(size=18),
         axis.title=element_text(size=20,face="bold")) +
   labs(x = "Time at depth (m)",
-       y = "Density (scaled)") +
-  theme(axis.text=element_text(size=18),
-        axis.title=element_text(size=20,face="bold")) +
-  theme(axis.title.x=element_text(vjust=-1)) +
+       y = "Relative frequency") +
+  # theme(axis.text=element_text(size=18),
+        # axis.title=element_text(size=20,face="bold")) +
+  theme(axis.text=element_text(size=25),
+        axis.title=element_text(size=30,face="bold")) +
+    theme(axis.title.x=element_text(vjust=-1)) +
   theme(axis.title.y=element_text(angle=90, vjust=2)) +
   theme(plot.title=element_text(size=15, vjust=3)) +
   theme(plot.margin = unit(c(1,1,1,1), "cm")) +
