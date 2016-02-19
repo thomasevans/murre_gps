@@ -28,3 +28,9 @@ wsc_depth.ps
 wsc_coldist2.ps
 wsc_depth2.ps
 wsc_depth_dives2.ps
+wsc_chick_fledge_new.ps
+wsc_chick_weight_new.ps
+wsc_coldist2_new.ps
+wsc_depth2_new.ps
+wsc_depth_dives2_new.ps
+*.ps
