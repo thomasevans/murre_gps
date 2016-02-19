@@ -35,3 +35,6 @@ wsc_depth2_new.ps
 wsc_depth_dives2_new.ps
 *.ps
 murre_gps_data.RData
+g11_details.txt
+*.txt
+*.csv
