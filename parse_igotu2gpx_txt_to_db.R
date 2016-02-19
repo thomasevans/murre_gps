@@ -19,7 +19,10 @@ files <- list.files(path =
                     all.files = FALSE,
                     full.names = FALSE, recursive = FALSE,
                     ignore.case = FALSE, include.dirs = FALSE)
+
+# View what file are found
 files
+
 # Vector of device IDs
 fun.wrap <- function(x){
   # strsplit(x, split = ".txt" )[[1]][1]
