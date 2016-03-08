@@ -83,7 +83,7 @@ speed_mean <- speed_median <- speed_max <- NULL
 elev_mean <- elev_median <- elev_max <- elev_min <- NULL
 device_type <- NULL
 long_start <- long_end <- lat_start <- lat_end <- NULL
-
+interval_mean <- interval_min <- interval_max <- NULL
 source("deg.dist.R")
 source("m_deg_dist.R")
 
@@ -111,10 +111,10 @@ for(i in 1:length(flight_ids)){
   flight_dep_id[i] <- as.character(points.sub$deploy_id[1])
   trip_id[i] <- points.sub$trip_id[1]
   flight_duration[i] <- flight_end[i] - flight_start[i]
-  time_intervals <- c(NA,points.sub$date_time[-1] - points.sub$date_time[-n])
-  interval_mean <- mean(time_intervals, na.rm = TRUE)
-  interval_min <- min(time_intervals, na.rm = TRUE)
-  interval_max <- max(time_intervals, na.rm = TRUE)
+  time_intervals <- c(NA, points.sub$date_time[-1] - points.sub$date_time[-n])
+  interval_mean[i] <- mean(time_intervals, na.rm = TRUE)
+  interval_min[i] <- min(time_intervals, na.rm = TRUE)
+  interval_max[i] <- max(time_intervals, na.rm = TRUE)
 
   # Summary calculations
   # Straight-line distance
@@ -235,6 +235,7 @@ names(flights.df) <- c("flight_id",  "ring_number",  "deploy_id",
 # 
 
 str(flights.df)
+
 
 
 # Add flight type, and number on trip etc ------
