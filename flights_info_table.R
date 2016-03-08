@@ -74,7 +74,7 @@ flight_end <- NULL
 flight_id <- NULL
 flight_device_info_serial <- NULL
 flight_ring_number <- NULL
-flight_col_dist_dif <- flight_col_dist_start <- flight_col_dist_end <- NULL
+flight_col_dist_dif <- flight_col_dist_start <- flight_col_dist_end <- flight_col_dist_max <- NULL
 flight_dep_id <- NULL
 n_points <- trip_id <- NULL
 flight_duration <- dist_straight <- p2p2_dist <- NULL
@@ -82,7 +82,7 @@ trip_id <- NULL
 speed_mean <- speed_median <- speed_max <- NULL
 elev_mean <- elev_median <- elev_max <- elev_min <- NULL
 device_type <- NULL
-
+long_start <- long_end <- lat_start <- lat_end <- NULL
 
 source("deg.dist.R")
 source("m_deg_dist.R")
@@ -96,17 +96,26 @@ for(i in 1:length(flight_ids)){
   n <- n_points[i]  <- length(points.sub$device_info_serial)
   flight_start[i] <- min(points.sub$date_time)
   flight_end[i]   <- max(points.sub$date_time)
+  long_start[i]  <- points.sub$longitude[1]
+  long_end[i]  <- points.sub$longitude[n]
+  lat_start[i]  <- points.sub$latitude[1]
+  lat_end[i]  <- points.sub$latitude[n]
   flight_id[i]    <- id
   flight_col_dist_start[i]  <- points.sub$coldist[1]
   flight_col_dist_end[i]  <- points.sub$coldist[n_points[i]]
   flight_col_dist_dif[i] <-  flight_col_dist_end[i] - flight_col_dist_start[i]
+  flight_col_dist_max[i] <- max(points.sub$coldist, na.rm = TRUE)
   flight_device_info_serial[i] <- as.character(
     points.sub$device_info_serial[1])
   flight_ring_number[i] <- as.character(points.sub$ring_number[1])
   flight_dep_id[i] <- as.character(points.sub$deploy_id[1])
   trip_id[i] <- points.sub$trip_id[1]
   flight_duration[i] <- flight_end[i] - flight_start[i]
-  
+  time_intervals <- c(NA,points.sub$date_time[-1] - points.sub$date_time[-n])
+  interval_mean <- mean(time_intervals, na.rm = TRUE)
+  interval_min <- min(time_intervals, na.rm = TRUE)
+  interval_max <- max(time_intervals, na.rm = TRUE)
+
   # Summary calculations
   # Straight-line distance
   dist_straight[i] <- deg.dist(points.sub$longitude[1],
@@ -194,23 +203,29 @@ device_type <- as.factor(device_type)
 
 flights.df <- data.frame(flight_id, flight_ring_number, flight_dep_id,
                          flight_device_info_serial, flight_start, flight_end,
+                         long_start, lat_start, long_end, lat_end,
                          n_points, flight_col_dist_start,
                          flight_col_dist_end, flight_col_dist_dif,
+                         flight_col_dist_max,
                           trip_id, flight_duration,
                          dist_straight, p2p2_dist, speed_mean, speed_max, speed_median,
-                         elev_mean, elev_median, elev_max, elev_min, device_type)
+                         elev_mean, elev_median, elev_max, elev_min, device_type,
+                         interval_mean, interval_min, interval_max)
 
 str(flights.df)
 
 names(flights.df) <- c("flight_id",  "ring_number",  "deploy_id", 
                          "device_info_serial",  "start_time",  "end_time", 
+                       "long_start", "lat_start", "long_end", "lat_end",
                          "n_points",  "col_dist_start", 
-                         "col_dist_end",  "col_dist_dif", 
+                         "col_dist_end",  "col_dist_dif",
+                         "col_dist_max",
                           "trip_id",  "duration", 
                          "dist_straight",  "p2p2_dist",  "speed_mean",
                        "speed_max",  "speed_median", 
                          "alt_mean",  "alt_median",  "alt_max",  "alt_min",
-                       "device_type")
+                       "device_type",
+                       "interval_mean", "interval_min", "interval_max")
 
 # See how the data looks
 # hist(flights.df$dist_straight)
@@ -295,7 +310,7 @@ summary(flights.df$type)
 # Output to DB ----
 # will be neccessary to edit table in Access after to define data-types and primary keys and provide descriptions for each variable.
 sqlSave(gps.db, flights.df,
-        tablename = "guillemots_gps_flights",
+        tablename = "guillemots_gps_flights_NEW",
         append = FALSE, rownames = FALSE, colnames = FALSE,
         verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
         test = FALSE, nastring = NULL,
@@ -303,6 +318,14 @@ sqlSave(gps.db, flights.df,
                       end_time = "datetime")
 )
 
+
+sqlSave(gps.db, gpspoints,
+        tablename = "guillemots_gps_points_all",
+        append = FALSE, rownames = FALSE, colnames = FALSE,
+        verbose = FALSE, safer = TRUE, addPK = FALSE, fast = TRUE,
+        test = FALSE, nastring = NULL,
+        varTypes =  c(date_time = "datetime")
+)
 
 
 
