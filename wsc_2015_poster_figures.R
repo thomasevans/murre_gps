@@ -210,10 +210,10 @@ col.vec.al <- addalpha(col.vec, alpha = 0.7)
 col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
 
 resa = 300
-# png("wsc_2015_trips.png", res = resa, width = 8*resa, height = 8*resa)
+png("wsc_2015_trips.png", res = resa, width = 8*resa, height = 8*resa)
 
 pdf("wsc_2015_trips.pdf", width = 8, height = 8)
-
+# svg("wsc_2015_trips.svg", width = 8, height = 8)
 # ?pdf
 
 map.base.fun(box.col = rainbow_hcl(3)[2],
@@ -258,9 +258,13 @@ col.vec.al <- addalpha(col.vec, alpha = 0.7)
 col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
 
 resa = 300
-# png("wsc_2014_trips.png", res = resa, width = 8*resa, height = 8*resa)
+png("wsc_2014_trips_trans.png", res = resa, width = 8*resa, height = 8*resa,
+    bg = "transparent")
 
 pdf("wsc_2014_trips.pdf", width = 8, height = 8)
+
+# win.metafile(filename = "", width = 7, height = 7, pointsize = 12)
+# ?png
 
 # ?pdf
 
