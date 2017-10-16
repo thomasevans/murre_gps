@@ -1,4 +1,4 @@
-function (x, y, relwidth = 0.15, metric = TRUE, ratio = TRUE, line.col = "black", lwd.line = 1, 
+map.scale2 <- function (x, y, relwidth = 0.15, metric = TRUE, ratio = TRUE, line.col = "black", lwd.line = 1, 
     ...) 
 {
     format.pretty <- function(x, digits = 2) {
