@@ -69,12 +69,12 @@ source("map.scale2.R")
 murre_ids <- unique(gps_all$bird_id)
 
 # # Use if want colours
-# col.vec <- rainbow(length(murre_ids))
-# col.vec.al <- addalpha(col.vec, alpha = 0.3)
+col.vec <- rainbow(length(murre_ids))
+col.vec.al <- addalpha(col.vec, alpha = 0.3)
 # # To randomize colour order
 # # For repeatable 'random' order
-# set.seed(1)
-# col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
+set.seed(1)
+col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
 # 
 # # # If don't want colours
 # # col.vec.al.rand <- addalpha("black", alpha = 0.4)
@@ -139,9 +139,9 @@ summary(factor(gps_all$trip_id))
 # png, svg, or pdf). Svg and pdf are vector formats, so are better
 # for resizing.
 resa = 72*4
-png("razo_gps_tracks_col2.png", res = resa, width = 5*resa, height = 5*resa)
-svg("razo_gps_tracks_col2.svg",width = 5, height = 5)
-pdf("razo_gps_tracks_col2.pdf",width = 5, height = 5)
+png("razo_gps_tracks_col_trips.png", res = resa, width = 5*resa, height = 5*resa)
+svg("razo_gps_tracks_col_trips.svg",width = 5, height = 5)
+pdf("razo_gps_tracks_col_trips.pdf",width = 5, height = 5)
 
 # Replace zeros with NA
 gps_all$trip_id[gps_all$trip_id == 0] <- NA
@@ -150,12 +150,17 @@ summary(factor(gps_all$trip_id))
 
 map.base.fun(xlim = range(gps_all$long), ylim = range(gps_all$lat))
 
-cols <- rainbow(n = max(gps_all$trip_id, na.rm = TRUE))
-cols <- addalpha(cols, 0.7)
+# cols <- rainbow(n = max(gps_all$trip_id, na.rm = TRUE))
+# cols <- addalpha(cols, 0.7)
+# 
+# # Shuffle
+# set.seed(1)
+# cols <- sample(cols, max(gps_all$trip_id, na.rm = TRUE))
 
-# Shuffle
+# Trip line types
 set.seed(1)
-cols <- sample(cols, max(gps_all$trip_id, na.rm = TRUE))
+lty.t <- sample(1:6, length(unique(gps_all$trip_id)),
+                replace = TRUE)
 
 # Map each bird in turn
 # i <- 4
@@ -163,12 +168,18 @@ for(i in 1:length(murre_ids)){
   
   x <- murre_ids[i]
   # ?subset
-  gps.sub <- gps_all[gps_all$bird_id == x,]
+  gps.sub <- gps_all[gps_all$bird_id == x  &
+                       !is.na(gps_all$trip_id),]
   n <- length(gps.sub$long)
   segments(gps.sub$long[-1], gps.sub$lat[-1],
            gps.sub$long[1:n-1], gps.sub$lat[1:n-1],
-           col = cols[gps.sub$trip_id], lty = 1, lwd = 1)
+           col = col.vec.al.rand[i],
+           lty = lty.t[gps.sub$trip_id[-1]],
+           lwd = 1.5)
 }
+
+# col.vec.al.rand[gps.sub$trip_id]
+# unique(gps_all$trip_id)
 
 # Add map scale bar
 map.scale2(ratio = FALSE, lwd.line = 2,
