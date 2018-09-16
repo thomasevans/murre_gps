@@ -39,16 +39,56 @@ gadm_clip <- crop(gadm, extent(range(gps_all$long)[1]-0.5,
                                range(gps_all$lat)[1]-0.5,
                                range(gps_all$lat)[2]+0.5))
 
-map.base.fun <- function(xlim = c(17,18.3), ylim =  c(57,57.7)){
+map.base.fun <- function(xlim = c(17,18.3), ylim =  c(57,57.7),
+                         bath = FALSE){
   par(mfrow=c(1,1))
   par( mar = c(5, 4, 4, 2))
+  
+  
+  if(bath){
+    
+    # Batymetry colours
+    bath.break.points <- c(0, -20, seq(-30,-70,-10),-90,-110,-250)
+    bath.col <- rev(brewer.pal(9,"PuBu"))
+    bath.col <- addalpha(bath.col, 0.7)
+    
+    # Bathymetry
+    load('bsbd_raster.RData')
+    
+    library("raster")
+    bath_raster <- raster("bsbd-0.9.3.grd")
+    
+    bath_raster_clip <- crop(bath_raster, extent(xlim+ c(-0.5,0.5), ylim+ c(-0.2,0.2)))
+    
+     plot(gadm_clip, col=NA, bg = NA,xlim = xlim, ylim = ylim)
+     plot(bath_raster_clip, colNA = "white", col = bath.col, add = TRUE ,
+          breaks = bath.break.points, legend = TRUE)
+     # legend("topleft")
+     
+     plot(gadm_clip, col= "dark grey", bg = NA,
+          lty = 1,
+          lwd = 1, add = TRUE)
+     # rangeBuilder::addRasterLegend(bath_raster_clip,
+     #                               location = 'left',
+     #                               ramp = (bath.col),
+     #                               breaks = rev(bath.break.points),
+     #                               digits = 0,
+     #                               ncolors = 9)
+    
+    
+  } else {
+    
+    plot(gadm_clip, xlim = xlim,
+         ylim = ylim, col= "dark grey", bg = NA,
+         lty = 1,
+         lwd = 1)
+    
+  }
+  
 
   # How map appears, col gives the fill colour
   # Lty and lwd give the line type (e.g. broken or solid) and line width
-  plot(gadm_clip, xlim = xlim,
-       ylim = ylim, col= "dark grey", bg = NA,
-       lty = 1,
-       lwd = 1)
+
   
   ## Scale bar and axis
   box(lwd=3)
@@ -69,12 +109,12 @@ source("map.scale2.R")
 murre_ids <- unique(gps_all$bird_id)
 
 # # Use if want colours
-col.vec <- rainbow(length(murre_ids))
-col.vec.al <- addalpha(col.vec, alpha = 0.3)
+# col.vec <- rainbow(length(murre_ids))
+# col.vec.al <- addalpha(col.vec, alpha = 0.3)
 # # To randomize colour order
 # # For repeatable 'random' order
-set.seed(1)
-col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
+# set.seed(1)
+# col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
 # 
 # # # If don't want colours
 # # col.vec.al.rand <- addalpha("black", alpha = 0.4)
@@ -139,42 +179,60 @@ summary(factor(gps_all$trip_id))
 # png, svg, or pdf). Svg and pdf are vector formats, so are better
 # for resizing.
 resa = 72*4
-png("razo_gps_tracks_col_trips.png", res = resa, width = 5*resa, height = 5*resa)
-svg("razo_gps_tracks_col_trips.svg",width = 5, height = 5)
-pdf("razo_gps_tracks_col_trips.pdf",width = 5, height = 5)
+png("razo_gps_tracks_col_trips3_bath3.png", res = resa, width = 5*resa, height = 5*resa)
+svg("razo_gps_tracks_col_trips3_bath3.svg",width = 5, height = 5)
+pdf("razo_gps_tracks_col_trips3_bath3.pdf",width = 5, height = 5)
 
 # Replace zeros with NA
 gps_all$trip_id[gps_all$trip_id == 0] <- NA
 summary(factor(gps_all$trip_id))
 
 
-map.base.fun(xlim = range(gps_all$long), ylim = range(gps_all$lat))
+map.base.fun(xlim = range(gps_all$long), ylim = range(gps_all$lat),
+             bath = TRUE)
 
 # cols <- rainbow(n = max(gps_all$trip_id, na.rm = TRUE))
 # cols <- addalpha(cols, 0.7)
-# 
-# # Shuffle
+# # 
+# # # Shuffle
 # set.seed(1)
 # cols <- sample(cols, max(gps_all$trip_id, na.rm = TRUE))
+# 
+# # Trip line types
+# set.seed(1)
+# lty.t <- sample(1:6, length(unique(gps_all$trip_id)),
+#                 replace = TRUE)
 
-# Trip line types
+length(murre_ids)
+
+# Colours
+cols <- c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02')
 set.seed(1)
-lty.t <- sample(1:6, length(unique(gps_all$trip_id)),
-                replace = TRUE)
+# Re-order colours
+cols <- sample(cols)
 
 # Map each bird in turn
 # i <- 4
 for(i in 1:length(murre_ids)){
   
   x <- murre_ids[i]
+  bird_n <- grep(x, murre_ids)
+  
   # ?subset
   gps.sub <- gps_all[gps_all$bird_id == x  &
                        !is.na(gps_all$trip_id),]
   n <- length(gps.sub$long)
+  seqall <- 1:n
+  x <- floor(n/20)   # Plot around 12 points per trip
+  if(x == 0) x <- 1
+  keeps <- (seqall %% x) == 1  # Plot every xth point
+  # points(gps.sub$long[keeps], gps.sub$lat[keeps],
+         # pch = bird_n, col = cols[gps.sub$trip_id[keeps]],
+         # cex = 0.7)
   segments(gps.sub$long[-1], gps.sub$lat[-1],
            gps.sub$long[1:n-1], gps.sub$lat[1:n-1],
-           col = col.vec.al.rand[i],
-           lty = lty.t[gps.sub$trip_id[-1]],
+           col = cols[i],
+           lty = 1,
            lwd = 1.5)
 }
 
@@ -185,4 +243,40 @@ for(i in 1:length(murre_ids)){
 map.scale2(ratio = FALSE, lwd.line = 2,
            relwidth = 0.25, cex = 1.2)
 
+# ?legend
+# legend("topright", legend = murre_ids, col = cols,
+#        lty = 1, lwd = 2, title = "Razorbill ID"
+#        )
+
+
 dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Trip distance overview thing --------
+library(dplyr)
+trip.summary <- gps_all %>% filter(!is.na(trip_id)) %>% group_by(bird_id, trip_id) %>% summarise(col_dist_max = max(col.dist),
+     col_dist_mean = mean(col.dist),
+     col_dist_median = median(col.dist))
+
+write.csv(trip.summary, file = "trip_distances.csv",
+          row.names = FALSE)
+
+trip.summary.bird <- trip.summary %>% group_by(bird_id) %>% 
+  summarise(col_dist_max = max(col_dist_mean),
+            col_dist_min = min(col_dist_mean),
+            col_dist_mean = mean(col_dist_mean),
+            trips_number = n())
+
+write.csv(trip.summary.bird, file = "trip_distances_birds.csv",
+          row.names = FALSE)
