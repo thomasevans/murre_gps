@@ -42,7 +42,7 @@ gadm_clip <- crop(gadm, extent(range(gps_all$long)[1]-0.5,
 map.base.fun <- function(xlim = c(17,18.3), ylim =  c(57,57.7),
                          bath = FALSE){
   par(mfrow=c(1,1))
-  par( mar = c(5, 4, 4, 2))
+  par( mar = c(5, 4, 4, 5))
   
   
   if(bath){
@@ -61,8 +61,17 @@ map.base.fun <- function(xlim = c(17,18.3), ylim =  c(57,57.7),
     bath_raster_clip <- crop(bath_raster, extent(xlim+ c(-0.5,0.5), ylim+ c(-0.2,0.2)))
     
      plot(gadm_clip, col=NA, bg = NA,xlim = xlim, ylim = ylim)
+     
+     box(lwd=3)
+     # axis(side=(1),las=1, line = 0)
+     # axis(side=(2),las=1)
+     map.axes(cex.axis=0.8, las = 1)
+     
+     
      plot(bath_raster_clip, colNA = "white", col = bath.col, add = TRUE ,
-          breaks = bath.break.points, legend = TRUE)
+          breaks = bath.break.points, legend = FALSE,
+          legend.shrink=0.6, legend.width=1.5,
+          legend.bg = "white")
      # legend("topleft")
      
      plot(gadm_clip, col= "dark grey", bg = NA,
@@ -75,6 +84,23 @@ map.base.fun <- function(xlim = c(17,18.3), ylim =  c(57,57.7),
      #                               digits = 0,
      #                               ncolors = 9)
     
+     
+     # plot(bath_raster_clip, legend.only=TRUE, legend.shrink=0.6, legend.width=1.5, zlim=c(0, 1), col = bath.col,
+     #      breaks = bath.break.points, legend.bg = "white", legend.bty = "o", legend.box.lwd = 2, labs = c(0,-20,"",-40, "", -60, "", -90, -110, -250), 
+     #      cex.lab = 0.8, legend.pt.bg = "white",
+     #      legend.x = "bottom right")
+     
+     # ?legend
+     
+     
+     
+     plot(bath_raster_clip, legend.only=TRUE, col=bath.col,
+          legend.width=1, legend.shrink=0.9,
+          breaks = bath.break.points,
+          axis.args=list(at= bath.break.points,
+                         labels=bath.break.points,
+                         cex.axis=0.6),
+          legend.args=list(text='Depth (m)', side=4, font=2, line=2.5, cex=0.8))
     
   } else {
     
@@ -91,9 +117,11 @@ map.base.fun <- function(xlim = c(17,18.3), ylim =  c(57,57.7),
 
   
   ## Scale bar and axis
+  par(xpd=TRUE)
+  
   box(lwd=3)
-  axis(side=(1),las=1)
-  axis(side=(2),las=1)
+  
+  # ?plot
   
 }
 
@@ -179,17 +207,19 @@ summary(factor(gps_all$trip_id))
 # png, svg, or pdf). Svg and pdf are vector formats, so are better
 # for resizing.
 resa = 72*4
-png("razo_gps_tracks_col_trips3_bath3.png", res = resa, width = 5*resa, height = 5*resa)
+png("razo_gps_tracks_col_trips3_bath5.png", res = resa, width = 5*resa, height = 5*resa)
 svg("razo_gps_tracks_col_trips3_bath3.svg",width = 5, height = 5)
-pdf("razo_gps_tracks_col_trips3_bath3.pdf",width = 5, height = 5)
+pdf("razo_gps_tracks_col_trips3_bath5.pdf",width = 5, height = 5)
 
 # Replace zeros with NA
 gps_all$trip_id[gps_all$trip_id == 0] <- NA
 summary(factor(gps_all$trip_id))
 
-
+par(xpd=FALSE)
 map.base.fun(xlim = range(gps_all$long), ylim = range(gps_all$lat),
              bath = TRUE)
+
+
 
 # cols <- rainbow(n = max(gps_all$trip_id, na.rm = TRUE))
 # cols <- addalpha(cols, 0.7)
@@ -207,13 +237,13 @@ length(murre_ids)
 
 # Colours
 cols <- c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02')
-set.seed(1)
+set.seed(4)
 # Re-order colours
 cols <- sample(cols)
 
 # Map each bird in turn
 # i <- 4
-for(i in 1:length(murre_ids)){
+for(i in 3:length(murre_ids)){
   
   x <- murre_ids[i]
   bird_n <- grep(x, murre_ids)
@@ -241,14 +271,17 @@ for(i in 1:length(murre_ids)){
 
 # Add map scale bar
 map.scale2(ratio = FALSE, lwd.line = 2,
-           relwidth = 0.25, cex = 1.2)
+           relwidth = 0.25, cex = 0.8)
 
 # ?legend
-# legend("topright", legend = murre_ids, col = cols,
-#        lty = 1, lwd = 2, title = "Razorbill ID"
-#        )
-
-
+par(xpd=TRUE)
+legend("bottom", legend = murre_ids[3:6], col = cols[3:6],
+       lty = 1, lwd = 2, title = "Razorbill ID",
+       inset=c(0,-0.3), ncol = length(murre_ids)-2,
+       cex = 0.8
+       )
+# ?legend
+par(xpd=FALSE)
 dev.off()
 
 
